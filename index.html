@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geoportal - Cámaras Pluviales</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="map"></div>
+    
+    <div class="control-panel">
+        <h3>
+            <span>🗺️</span>
+            <span>Geoportal Cámaras</span>
+        </h3>
+        
+        <button class="show-config" onclick="toggleConfig()">⚙️ Mostrar Configuración</button>
+        
+        <div class="config-toggle" id="configPanel">
+            <div class="input-group">
+                <label>🔗 URL de Supabase</label>
+                <input type="text" id="url" value="https://adegqxfsluwkddhqoxke.supabase.co">
+            </div>
+            
+            <div class="input-group">
+                <label>🔑 API Key</label>
+                <input type="password" id="key" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkZWdxeGZzbHV3a2RkaHFveGtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk0MjYwOTUsImV4cCI6MjA3NTAwMjA5NX0.l07Ipaeu3KbWfT5Bj09sYls1elveYKOPV7jqaeTt_tk">
+            </div>
+            
+            <div class="input-group">
+                <label>📊 Nombre de la tabla</label>
+                <input type="text" id="tabla" value="camaras">
+            </div>
+            
+            <div class="input-group">
+                <label>📍 Campo de geometría</label>
+                <input type="text" id="geomField" value="geom">
+            </div>
+        </div>
+        
+        <button class="btn-primary" onclick="cargarCapa()">
+            <span>🔍</span>
+            <span>Cargar Capa</span>
+        </button>
+        
+        <button class="btn-secondary" onclick="limpiarCapa()" style="display: none;" id="btnLimpiar">
+            🗑️ Limpiar Capa
+        </button>
+        
+        <div id="status"></div>
+        
+        <div class="info-panel" id="infoPanel" style="display: none;">
+            <strong>Puntos cargados:</strong> <span id="totalPuntos">0</span><br>
+            <strong>Última actualización:</strong> <span id="ultimaActualizacion">-</span>
+        </div>
+    </div>
+
+    <div class="credits">
+        <div class="credits-title">👨‍💻 Desarrollado por:</div>
+        <div class="credits-names">
+            <div>Ing. John Leonardo Cabrera Espíndola</div>
+            <div>Ing. Luis Freddy Quenta Alegría</div>
+        </div>
+    </div>
+
+    <div class="legend">
+        <h4>📋 Leyenda</h4>
+        <div class="legend-item">
+            <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="16" r="13" fill="#fafafa" stroke="#4a4a4a" stroke-width="2"/>
+                <circle cx="16" cy="16" r="9.5" fill="none" stroke="#28a745" stroke-width="2"/>
+                <g transform="translate(16, 16)">
+                    <rect x="-6" y="-3" width="4.5" height="1.5" fill="#28a745" rx="0.5"/>
+                    <rect x="1.5" y="-3" width="4.5" height="1.5" fill="#28a745" rx="0.5"/>
+                    <rect x="-6" y="0" width="4.5" height="1.5" fill="#28a745" rx="0.5"/>
+                    <rect x="1.5" y="0" width="4.5" height="1.5" fill="#28a745" rx="0.5"/>
+                    <rect x="-6" y="3" width="4.5" height="1.5" fill="#28a745" rx="0.5"/>
+                    <rect x="1.5" y="3" width="4.5" height="1.5" fill="#28a745" rx="0.5"/>
+                </g>
+            </svg>
+            <span>Accesible Operativo</span>
+        </div>
+        <div class="legend-item">
+            <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="16" r="13" fill="#fafafa" stroke="#4a4a4a" stroke-width="2"/>
+                <circle cx="16" cy="16" r="9.5" fill="none" stroke="#ffc107" stroke-width="2"/>
+                <g transform="translate(16, 16)">
+                    <rect x="-6" y="-2" width="4.5" height="1.5" fill="#ffc107" rx="0.5"/>
+                    <rect x="1.5" y="-2" width="4.5" height="1.5" fill="#ffc107" rx="0.5"/>
+                    <rect x="-6" y="0.5" width="4.5" height="1.5" fill="#ffc107" rx="0.5"/>
+                    <rect x="1.5" y="0.5" width="4.5" height="1.5" fill="#ffc107" rx="0.5"/>
+                    <rect x="-6" y="3" width="4.5" height="1.5" fill="#ffc107" rx="0.5"/>
+                    <rect x="1.5" y="3" width="4.5" height="1.5" fill="#ffc107" rx="0.5"/>
+                </g>
+            </svg>
+            <span>Accesible con Dificultad</span>
+        </div>
+        <div class="legend-item">
+            <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="16" r="13" fill="#fafafa" stroke="#4a4a4a" stroke-width="2"/>
+                <circle cx="16" cy="16" r="9.5" fill="none" stroke="#6c757d" stroke-width="2"/>
+                <g transform="translate(16, 16)">
+                    <rect x="-6" y="-2" width="4.5" height="1.5" fill="#6c757d" rx="0.5"/>
+                    <rect x="1.5" y="-2" width="4.5" height="1.5" fill="#6c757d" rx="0.5"/>
+                    <rect x="-6" y="0.5" width="4.5" height="1.5" fill="#6c757d" rx="0.5"/>
+                    <rect x="1.5" y="0.5" width="4.5" height="1.5" fill="#6c757d" rx="0.5"/>
+                    <rect x="-6" y="3" width="4.5" height="1.5" fill="#6c757d" rx="0.5"/>
+                    <rect x="1.5" y="3" width="4.5" height="1.5" fill="#6c757d" rx="0.5"/>
+                </g>
+            </svg>
+            <span>Inferido</span>
+        </div>
+        <div class="legend-item">
+            <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="16" r="13" fill="#fafafa" stroke="#4a4a4a" stroke-width="2"/>
+                <circle cx="16" cy="16" r="9.5" fill="none" stroke="#dc3545" stroke-width="2"/>
+                <g transform="translate(16, 16)">
+                    <rect x="-6" y="-2" width="4.5" height="1.5" fill="#dc3545" rx="0.5"/>
+                    <rect x="1.5" y="-2" width="4.5" height="1.5" fill="#dc3545" rx="0.5"/>
+                    <rect x="-6" y="0.5" width="4.5" height="1.5" fill="#dc3545" rx="0.5"/>
+                    <rect x="1.5" y="0.5" width="4.5" height="1.5" fill="#dc3545" rx="0.5"/>
+                    <rect x="-6" y="3" width="4.5" height="1.5" fill="#dc3545" rx="0.5"/>
+                    <rect x="1.5" y="3" width="4.5" height="1.5" fill="#dc3545" rx="0.5"/>
+                </g>
+            </svg>
+            <span>No Accesible</span>
+        </div>
+        <div class="legend-item">
+            <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="16" r="13" fill="#fafafa" stroke="#4a4a4a" stroke-width="2"/>
+                <circle cx="16" cy="16" r="9.5" fill="none" stroke="#17a2b8" stroke-width="2"/>
+                <g transform="translate(16, 16)">
+                    <rect x="-6" y="-2" width="4.5" height="1.5" fill="#17a2b8" rx="0.5"/>
+                    <rect x="1.5" y="-2" width="4.5" height="1.5" fill="#17a2b8" rx="0.5"/>
+                    <rect x="-6" y="0.5" width="4.5" height="1.5" fill="#17a2b8" rx="0.5"/>
+                    <rect x="1.5" y="0.5" width="4.5" height="1.5" fill="#17a2b8" rx="0.5"/>
+                    <rect x="-6" y="3" width="4.5" height="1.5" fill="#17a2b8" rx="0.5"/>
+                    <rect x="1.5" y="3" width="4.5" height="1.5" fill="#17a2b8" rx="0.5"/>
+                </g>
+            </svg>
+            <span>Otro estado</span>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
