@@ -10,9 +10,15 @@
 <body>
     <div id="map"></div>
     
+    <!-- Botón flotante para abrir panel de control -->
+    <button class="panel-toggle-btn" id="panelToggleBtn" onclick="togglePanel('controlPanel')" aria-label="Abrir panel de control">
+        ⚙️
+    </button>
+    
+    <!-- Panel de control -->
     <div class="control-panel" id="controlPanel">
-        <button class="panel-toggle" onclick="togglePanel('controlPanel')" aria-label="Toggle control panel">
-            ◀
+        <button class="panel-close" onclick="togglePanel('controlPanel')" aria-label="Cerrar panel">
+            ✕
         </button>
         <h3>
             <span>🗺️</span>
@@ -60,100 +66,108 @@
         </div>
     </div>
 
+    <!-- Botón flotante para abrir créditos -->
+    <button class="credits-toggle-btn" id="creditsToggleBtn" onclick="togglePanel('creditsPanel')" aria-label="Abrir créditos">
+        👥
+    </button>
+
+    <!-- Panel de créditos -->
     <div class="credits" id="creditsPanel">
-        <button class="credits-toggle" onclick="togglePanel('creditsPanel')" aria-label="Toggle credits">
-            👥
+        <button class="panel-close" onclick="togglePanel('creditsPanel')" aria-label="Cerrar créditos">
+            ✕
         </button>
-        <div class="credits-content">
-            <div class="credits-title">👨‍💻 Desarrollado por:</div>
-            <div class="credits-names">
-                <div>Ing. John Leonardo Cabrera Espíndola</div>
-                <div>Ing. Luis Freddy Quenta Alegría</div>
-            </div>
+        <div class="credits-title">👨‍💻 Desarrollado por:</div>
+        <div class="credits-names">
+            <div>Ing. John Leonardo Cabrera Espíndola</div>
+            <div>Ing. Luis Freddy Quenta Alegría</div>
         </div>
     </div>
 
+    <!-- Botón flotante para abrir leyenda -->
+    <button class="legend-toggle-btn" id="legendToggleBtn" onclick="togglePanel('legendPanel')" aria-label="Abrir leyenda">
+        📋
+    </button>
+
+    <!-- Panel de leyenda -->
     <div class="legend" id="legendPanel">
-        <button class="legend-toggle" onclick="togglePanel('legendPanel')" aria-label="Toggle legend">
-            📋
+        <button class="panel-close" onclick="togglePanel('legendPanel')" aria-label="Cerrar leyenda">
+            ✕
         </button>
-        <div class="legend-content">
-            <h4>📋 Leyenda</h4>
-            <div class="legend-item">
-                <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="16" cy="16" r="13" fill="#fafafa" stroke="#4a4a4a" stroke-width="2"/>
-                    <circle cx="16" cy="16" r="9.5" fill="none" stroke="#28a745" stroke-width="2"/>
-                    <g transform="translate(16, 16)">
-                        <rect x="-6" y="-3" width="4.5" height="1.5" fill="#28a745" rx="0.5"/>
-                        <rect x="1.5" y="-3" width="4.5" height="1.5" fill="#28a745" rx="0.5"/>
-                        <rect x="-6" y="0" width="4.5" height="1.5" fill="#28a745" rx="0.5"/>
-                        <rect x="1.5" y="0" width="4.5" height="1.5" fill="#28a745" rx="0.5"/>
-                        <rect x="-6" y="3" width="4.5" height="1.5" fill="#28a745" rx="0.5"/>
-                        <rect x="1.5" y="3" width="4.5" height="1.5" fill="#28a745" rx="0.5"/>
-                    </g>
-                </svg>
-                <span>Accesible Operativo</span>
-            </div>
-            <div class="legend-item">
-                <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="16" cy="16" r="13" fill="#fafafa" stroke="#4a4a4a" stroke-width="2"/>
-                    <circle cx="16" cy="16" r="9.5" fill="none" stroke="#ffc107" stroke-width="2"/>
-                    <g transform="translate(16, 16)">
-                        <rect x="-6" y="-2" width="4.5" height="1.5" fill="#ffc107" rx="0.5"/>
-                        <rect x="1.5" y="-2" width="4.5" height="1.5" fill="#ffc107" rx="0.5"/>
-                        <rect x="-6" y="0.5" width="4.5" height="1.5" fill="#ffc107" rx="0.5"/>
-                        <rect x="1.5" y="0.5" width="4.5" height="1.5" fill="#ffc107" rx="0.5"/>
-                        <rect x="-6" y="3" width="4.5" height="1.5" fill="#ffc107" rx="0.5"/>
-                        <rect x="1.5" y="3" width="4.5" height="1.5" fill="#ffc107" rx="0.5"/>
-                    </g>
-                </svg>
-                <span>Accesible con Dificultad</span>
-            </div>
-            <div class="legend-item">
-                <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="16" cy="16" r="13" fill="#fafafa" stroke="#4a4a4a" stroke-width="2"/>
-                    <circle cx="16" cy="16" r="9.5" fill="none" stroke="#6c757d" stroke-width="2"/>
-                    <g transform="translate(16, 16)">
-                        <rect x="-6" y="-2" width="4.5" height="1.5" fill="#6c757d" rx="0.5"/>
-                        <rect x="1.5" y="-2" width="4.5" height="1.5" fill="#6c757d" rx="0.5"/>
-                        <rect x="-6" y="0.5" width="4.5" height="1.5" fill="#6c757d" rx="0.5"/>
-                        <rect x="1.5" y="0.5" width="4.5" height="1.5" fill="#6c757d" rx="0.5"/>
-                        <rect x="-6" y="3" width="4.5" height="1.5" fill="#6c757d" rx="0.5"/>
-                        <rect x="1.5" y="3" width="4.5" height="1.5" fill="#6c757d" rx="0.5"/>
-                    </g>
-                </svg>
-                <span>Inferido</span>
-            </div>
-            <div class="legend-item">
-                <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="16" cy="16" r="13" fill="#fafafa" stroke="#4a4a4a" stroke-width="2"/>
-                    <circle cx="16" cy="16" r="9.5" fill="none" stroke="#dc3545" stroke-width="2"/>
-                    <g transform="translate(16, 16)">
-                        <rect x="-6" y="-2" width="4.5" height="1.5" fill="#dc3545" rx="0.5"/>
-                        <rect x="1.5" y="-2" width="4.5" height="1.5" fill="#dc3545" rx="0.5"/>
-                        <rect x="-6" y="0.5" width="4.5" height="1.5" fill="#dc3545" rx="0.5"/>
-                        <rect x="1.5" y="0.5" width="4.5" height="1.5" fill="#dc3545" rx="0.5"/>
-                        <rect x="-6" y="3" width="4.5" height="1.5" fill="#dc3545" rx="0.5"/>
-                        <rect x="1.5" y="3" width="4.5" height="1.5" fill="#dc3545" rx="0.5"/>
-                    </g>
-                </svg>
-                <span>No Accesible</span>
-            </div>
-            <div class="legend-item">
-                <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="16" cy="16" r="13" fill="#fafafa" stroke="#4a4a4a" stroke-width="2"/>
-                    <circle cx="16" cy="16" r="9.5" fill="none" stroke="#17a2b8" stroke-width="2"/>
-                    <g transform="translate(16, 16)">
-                        <rect x="-6" y="-2" width="4.5" height="1.5" fill="#17a2b8" rx="0.5"/>
-                        <rect x="1.5" y="-2" width="4.5" height="1.5" fill="#17a2b8" rx="0.5"/>
-                        <rect x="-6" y="0.5" width="4.5" height="1.5" fill="#17a2b8" rx="0.5"/>
-                        <rect x="1.5" y="0.5" width="4.5" height="1.5" fill="#17a2b8" rx="0.5"/>
-                        <rect x="-6" y="3" width="4.5" height="1.5" fill="#17a2b8" rx="0.5"/>
-                        <rect x="1.5" y="3" width="4.5" height="1.5" fill="#17a2b8" rx="0.5"/>
-                    </g>
-                </svg>
-                <span>Otro estado</span>
-            </div>
+        <h4>📋 Leyenda</h4>
+        <div class="legend-item">
+            <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="16" r="13" fill="#fafafa" stroke="#4a4a4a" stroke-width="2"/>
+                <circle cx="16" cy="16" r="9.5" fill="none" stroke="#28a745" stroke-width="2"/>
+                <g transform="translate(16, 16)">
+                    <rect x="-6" y="-3" width="4.5" height="1.5" fill="#28a745" rx="0.5"/>
+                    <rect x="1.5" y="-3" width="4.5" height="1.5" fill="#28a745" rx="0.5"/>
+                    <rect x="-6" y="0" width="4.5" height="1.5" fill="#28a745" rx="0.5"/>
+                    <rect x="1.5" y="0" width="4.5" height="1.5" fill="#28a745" rx="0.5"/>
+                    <rect x="-6" y="3" width="4.5" height="1.5" fill="#28a745" rx="0.5"/>
+                    <rect x="1.5" y="3" width="4.5" height="1.5" fill="#28a745" rx="0.5"/>
+                </g>
+            </svg>
+            <span>Accesible Operativo</span>
+        </div>
+        <div class="legend-item">
+            <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="16" r="13" fill="#fafafa" stroke="#4a4a4a" stroke-width="2"/>
+                <circle cx="16" cy="16" r="9.5" fill="none" stroke="#ffc107" stroke-width="2"/>
+                <g transform="translate(16, 16)">
+                    <rect x="-6" y="-2" width="4.5" height="1.5" fill="#ffc107" rx="0.5"/>
+                    <rect x="1.5" y="-2" width="4.5" height="1.5" fill="#ffc107" rx="0.5"/>
+                    <rect x="-6" y="0.5" width="4.5" height="1.5" fill="#ffc107" rx="0.5"/>
+                    <rect x="1.5" y="0.5" width="4.5" height="1.5" fill="#ffc107" rx="0.5"/>
+                    <rect x="-6" y="3" width="4.5" height="1.5" fill="#ffc107" rx="0.5"/>
+                    <rect x="1.5" y="3" width="4.5" height="1.5" fill="#ffc107" rx="0.5"/>
+                </g>
+            </svg>
+            <span>Accesible con Dificultad</span>
+        </div>
+        <div class="legend-item">
+            <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="16" r="13" fill="#fafafa" stroke="#4a4a4a" stroke-width="2"/>
+                <circle cx="16" cy="16" r="9.5" fill="none" stroke="#6c757d" stroke-width="2"/>
+                <g transform="translate(16, 16)">
+                    <rect x="-6" y="-2" width="4.5" height="1.5" fill="#6c757d" rx="0.5"/>
+                    <rect x="1.5" y="-2" width="4.5" height="1.5" fill="#6c757d" rx="0.5"/>
+                    <rect x="-6" y="0.5" width="4.5" height="1.5" fill="#6c757d" rx="0.5"/>
+                    <rect x="1.5" y="0.5" width="4.5" height="1.5" fill="#6c757d" rx="0.5"/>
+                    <rect x="-6" y="3" width="4.5" height="1.5" fill="#6c757d" rx="0.5"/>
+                    <rect x="1.5" y="3" width="4.5" height="1.5" fill="#6c757d" rx="0.5"/>
+                </g>
+            </svg>
+            <span>Inferido</span>
+        </div>
+        <div class="legend-item">
+            <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="16" r="13" fill="#fafafa" stroke="#4a4a4a" stroke-width="2"/>
+                <circle cx="16" cy="16" r="9.5" fill="none" stroke="#dc3545" stroke-width="2"/>
+                <g transform="translate(16, 16)">
+                    <rect x="-6" y="-2" width="4.5" height="1.5" fill="#dc3545" rx="0.5"/>
+                    <rect x="1.5" y="-2" width="4.5" height="1.5" fill="#dc3545" rx="0.5"/>
+                    <rect x="-6" y="0.5" width="4.5" height="1.5" fill="#dc3545" rx="0.5"/>
+                    <rect x="1.5" y="0.5" width="4.5" height="1.5" fill="#dc3545" rx="0.5"/>
+                    <rect x="-6" y="3" width="4.5" height="1.5" fill="#dc3545" rx="0.5"/>
+                    <rect x="1.5" y="3" width="4.5" height="1.5" fill="#dc3545" rx="0.5"/>
+                </g>
+            </svg>
+            <span>No Accesible</span>
+        </div>
+        <div class="legend-item">
+            <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="16" r="13" fill="#fafafa" stroke="#4a4a4a" stroke-width="2"/>
+                <circle cx="16" cy="16" r="9.5" fill="none" stroke="#17a2b8" stroke-width="2"/>
+                <g transform="translate(16, 16)">
+                    <rect x="-6" y="-2" width="4.5" height="1.5" fill="#17a2b8" rx="0.5"/>
+                    <rect x="1.5" y="-2" width="4.5" height="1.5" fill="#17a2b8" rx="0.5"/>
+                    <rect x="-6" y="0.5" width="4.5" height="1.5" fill="#17a2b8" rx="0.5"/>
+                    <rect x="1.5" y="0.5" width="4.5" height="1.5" fill="#17a2b8" rx="0.5"/>
+                    <rect x="-6" y="3" width="4.5" height="1.5" fill="#17a2b8" rx="0.5"/>
+                    <rect x="1.5" y="3" width="4.5" height="1.5" fill="#17a2b8" rx="0.5"/>
+                </g>
+            </svg>
+            <span>Otro estado</span>
         </div>
     </div>
 
