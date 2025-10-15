@@ -5,6 +5,7 @@ let capaActual = null;
 // Inicializar el mapa cuando la página esté lista
 document.addEventListener('DOMContentLoaded', function() {
     initMap();
+    initPanelStates();
 });
 
 function initMap() {
@@ -37,6 +38,33 @@ function initMap() {
     
     // Cargar la capa automáticamente después de 500ms
     setTimeout(cargarCapa, 500);
+}
+
+function initPanelStates() {
+    // En móviles, minimizar créditos por defecto
+    if (window.innerWidth <= 768) {
+        const creditsPanel = document.getElementById('creditsPanel');
+        if (creditsPanel) {
+            creditsPanel.classList.add('minimized');
+        }
+    }
+}
+
+function togglePanel(panelId) {
+    const panel = document.getElementById(panelId);
+    if (panel) {
+        panel.classList.toggle('minimized');
+        
+        // Actualizar el icono del botón
+        const button = panel.querySelector('button');
+        if (button && panelId === 'controlPanel') {
+            button.textContent = panel.classList.contains('minimized') ? '▶' : '◀';
+        } else if (button && panelId === 'legendPanel') {
+            button.textContent = panel.classList.contains('minimized') ? '◀' : '▶';
+        } else if (button && panelId === 'creditsPanel') {
+            button.textContent = panel.classList.contains('minimized') ? '▶' : '◀';
+        }
+    }
 }
 
 function toggleConfig() {
@@ -272,3 +300,10 @@ function getColor(accesibilidad) {
     if (acc.includes('INFERIDO')) return '#6c757d';
     return '#17a2b8';
 }
+
+// Ajustar tamaño del mapa cuando cambie el tamaño de la ventana
+window.addEventListener('resize', function() {
+    if (map) {
+        map.invalidateSize();
+    }
+});
