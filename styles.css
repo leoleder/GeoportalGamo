@@ -489,7 +489,7 @@ body {
 @media (max-width: 768px) {
     .control-panel {
         left: 20px;
-        top: 10px;
+        top: 140px;
         min-width: 280px;
         max-width: calc(100vw - 20px);
         padding: 15px;
@@ -497,7 +497,7 @@ body {
     }
 
     .panel-toggle-btn {
-        top: 10px;
+        top: 140px;
         left: 10px;
         width: 45px;
         height: 45px;
@@ -517,7 +517,7 @@ body {
     }
 
     .legend-toggle-btn {
-        bottom: 10px !important;
+        bottom: 90px !important;
         right: 10px;
         width: 45px;
         height: 45px;
@@ -588,7 +588,14 @@ body {
 
     /* Ajuste de zoom en móviles */
     .leaflet-control-zoom {
-        margin-bottom: 10px !important;
+        margin-top: 10px !important;
+        margin-left: 10px !important;
+        margin-bottom: 0 !important;
+    }
+
+    /* Control de capas */
+    .leaflet-control-layers {
+        margin-top: 10px !important;
         margin-right: 10px !important;
     }
 }
