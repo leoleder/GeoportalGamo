@@ -41,28 +41,49 @@ function initMap() {
 }
 
 function initPanelStates() {
-    // En móviles, minimizar créditos por defecto
+    // En móviles, ocultar todos los paneles y mostrar solo los botones
     if (window.innerWidth <= 768) {
-        const creditsPanel = document.getElementById('creditsPanel');
-        if (creditsPanel) {
-            creditsPanel.classList.add('minimized');
-        }
+        // Ocultar paneles
+        document.getElementById('controlPanel').classList.add('hidden');
+        document.getElementById('legendPanel').classList.add('hidden');
+        document.getElementById('creditsPanel').classList.add('hidden');
+        
+        // Mostrar botones flotantes
+        document.getElementById('panelToggleBtn').classList.add('visible');
+        document.getElementById('legendToggleBtn').classList.add('visible');
+        document.getElementById('creditsToggleBtn').classList.add('visible');
     }
 }
 
 function togglePanel(panelId) {
     const panel = document.getElementById(panelId);
-    if (panel) {
-        panel.classList.toggle('minimized');
+    if (!panel) return;
+    
+    const isHidden = panel.classList.contains('hidden');
+    
+    if (isHidden) {
+        // Mostrar el panel
+        panel.classList.remove('hidden');
         
-        // Actualizar el icono del botón
-        const button = panel.querySelector('button');
-        if (button && panelId === 'controlPanel') {
-            button.textContent = panel.classList.contains('minimized') ? '▶' : '◀';
-        } else if (button && panelId === 'legendPanel') {
-            button.textContent = panel.classList.contains('minimized') ? '◀' : '▶';
-        } else if (button && panelId === 'creditsPanel') {
-            button.textContent = panel.classList.contains('minimized') ? '▶' : '◀';
+        // Ocultar el botón correspondiente
+        if (panelId === 'controlPanel') {
+            document.getElementById('panelToggleBtn').classList.remove('visible');
+        } else if (panelId === 'legendPanel') {
+            document.getElementById('legendToggleBtn').classList.remove('visible');
+        } else if (panelId === 'creditsPanel') {
+            document.getElementById('creditsToggleBtn').classList.remove('visible');
+        }
+    } else {
+        // Ocultar el panel
+        panel.classList.add('hidden');
+        
+        // Mostrar el botón correspondiente
+        if (panelId === 'controlPanel') {
+            document.getElementById('panelToggleBtn').classList.add('visible');
+        } else if (panelId === 'legendPanel') {
+            document.getElementById('legendToggleBtn').classList.add('visible');
+        } else if (panelId === 'creditsPanel') {
+            document.getElementById('creditsToggleBtn').classList.add('visible');
         }
     }
 }
@@ -305,5 +326,34 @@ function getColor(accesibilidad) {
 window.addEventListener('resize', function() {
     if (map) {
         map.invalidateSize();
+    }
+    
+    // Reiniciar estados de paneles si cambia de móvil a desktop o viceversa
+    const isMobile = window.innerWidth <= 768;
+    const panelToggleBtn = document.getElementById('panelToggleBtn');
+    const legendToggleBtn = document.getElementById('legendToggleBtn');
+    const creditsToggleBtn = document.getElementById('creditsToggleBtn');
+    
+    if (isMobile) {
+        // Mostrar botones en móvil si los paneles están ocultos
+        if (document.getElementById('controlPanel').classList.contains('hidden')) {
+            panelToggleBtn.classList.add('visible');
+        }
+        if (document.getElementById('legendPanel').classList.contains('hidden')) {
+            legendToggleBtn.classList.add('visible');
+        }
+        if (document.getElementById('creditsPanel').classList.contains('hidden')) {
+            creditsToggleBtn.classList.add('visible');
+        }
+    } else {
+        // Ocultar botones en desktop
+        panelToggleBtn.classList.remove('visible');
+        legendToggleBtn.classList.remove('visible');
+        creditsToggleBtn.classList.remove('visible');
+        
+        // Mostrar paneles en desktop
+        document.getElementById('controlPanel').classList.remove('hidden');
+        document.getElementById('legendPanel').classList.remove('hidden');
+        document.getElementById('creditsPanel').classList.remove('hidden');
     }
 });
