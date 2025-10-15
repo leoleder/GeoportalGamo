@@ -489,7 +489,7 @@ body {
 @media (max-width: 768px) {
     .control-panel {
         left: 20px;
-        top: 140px;
+        top: 80px;
         min-width: 280px;
         max-width: calc(100vw - 20px);
         padding: 15px;
@@ -497,7 +497,7 @@ body {
     }
 
     .panel-toggle-btn {
-        top: 140px;
+        top: 80px;
         left: 10px;
         width: 45px;
         height: 45px;
@@ -578,11 +578,13 @@ body {
         padding: 8px;
     }
 
-    /* Ajuste de zoom en móviles */
+    /* Ajuste de zoom en móviles - MEDIO IZQUIERDO */
     .leaflet-control-zoom {
-        margin-top: 10px !important;
-        margin-left: 10px !important;
-        margin-bottom: 0 !important;
+        position: fixed !important;
+        top: 50% !important;
+        left: 10px !important;
+        transform: translateY(-50%) !important;
+        margin: 0 !important;
     }
 
     /* Control de capas */
