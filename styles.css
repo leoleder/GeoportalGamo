@@ -68,7 +68,7 @@ body {
 
 .panel-close {
     position: absolute;
-    top: 1px;
+    top: 3px;
     right: 8px;
     background: transparent;
     border: none;
