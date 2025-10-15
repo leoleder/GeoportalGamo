@@ -589,7 +589,7 @@ body {
     /* Ajuste de zoom en móviles */
     .leaflet-control-zoom {
         margin-bottom: 100px !important;
-        margin-right: 10px !important;
+        margin-right: 50px !important;
     }
 }
 
