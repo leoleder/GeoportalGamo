@@ -509,7 +509,7 @@ body {
 
     .credits {
         bottom: 20px;
-        left: 10px;
+        left: 50px;
         max-width: calc(100vw - 20px);
         padding: 10px 12px;
     }
