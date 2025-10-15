@@ -453,8 +453,8 @@ body {
 /* Responsive Design para móviles */
 @media (max-width: 768px) {
     .control-panel {
-        left: 50px;
-        top: 30px;
+        left: 20px;
+        top: 10px;
         min-width: 280px;
         max-width: calc(100vw - 20px);
         padding: 15px;
@@ -463,7 +463,7 @@ body {
 
     .panel-toggle-btn {
         top: 10px;
-        left: 50px;
+        left: 10px;
         width: 45px;
         height: 45px;
         font-size: 22px;
