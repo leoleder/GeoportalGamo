@@ -454,7 +454,7 @@ body {
 @media (max-width: 768px) {
     .control-panel {
         left: 10px;
-        top: 10px;
+        top: 30px;
         min-width: 280px;
         max-width: calc(100vw - 20px);
         padding: 15px;
