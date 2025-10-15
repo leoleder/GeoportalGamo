@@ -406,7 +406,7 @@ body {
 .credits-toggle-btn {
     position: absolute;
     bottom: 30px;
-    left: 20px;
+    left: 200px;
     background: white;
     border: none;
     width: 50px;
@@ -478,7 +478,7 @@ body {
 }
 
 .leaflet-control-zoom a:first-child {
-    margin-bottom: 5px !important;
+    margin-bottom: 1px !important;
     border-radius: 8px 8px 0 0 !important;
 }
 
@@ -489,8 +489,8 @@ body {
 /* Responsive Design para móviles */
 @media (max-width: 768px) {
     .control-panel {
-        left: 20px;
-        top: 80px;
+        left: 10px;
+        top: 20px;
         min-width: 280px;
         max-width: calc(100vw - 20px);
         padding: 15px;
@@ -498,7 +498,7 @@ body {
     }
 
     .panel-toggle-btn {
-        top: 80px;
+        top: 10px;
         left: 10px;
         width: 45px;
         height: 45px;
@@ -512,7 +512,7 @@ body {
     }
 
     .legend {
-        bottom: 20px;
+        bottom: 5px;
         right: 10px;
         min-width: 200px;
         max-width: calc(100vw - 20px);
@@ -521,7 +521,7 @@ body {
     }
 
     .legend-toggle-btn {
-        bottom: 180px !important;
+        bottom: 30px !important;
         right: 10px;
         width: 45px;
         height: 45px;
@@ -547,7 +547,7 @@ body {
     }
 
     .credits {
-        bottom: 70px;
+        bottom: 20px;
         left: 10px;
         max-width: calc(100vw - 20px);
         padding: 10px 12px;
@@ -556,7 +556,7 @@ body {
     }
 
     .credits-toggle-btn {
-        bottom: 20px !important;
+        bottom: 30px !important;
         left: 10px;
         width: 45px;
         height: 45px;
@@ -586,8 +586,8 @@ body {
     /* Ajuste de zoom en móviles - MEDIO IZQUIERDO */
     .leaflet-control-zoom {
         position: fixed !important;
-        top: 50% !important;
-        left: 10px !important;
+        top:20% !important;
+        right: 10px !important;
         transform: translateY(-50%) !important;
         margin: 0 !important;
     }
