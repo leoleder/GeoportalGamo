@@ -25,33 +25,68 @@ body {
     z-index: 1000;
     max-width: 360px;
     min-width: 320px;
-    transition: transform 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
 }
 
-.control-panel.minimized {
-    transform: translateX(calc(-100% + 60px));
+.control-panel.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.9);
 }
 
-.panel-toggle {
+.panel-toggle-btn {
     position: absolute;
-    right: -40px;
     top: 20px;
+    left: 20px;
     background: white;
     border: none;
-    width: 40px;
-    height: 40px;
-    border-radius: 0 8px 8px 0;
-    box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     cursor: pointer;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
-    transition: background 0.3s;
+    font-size: 24px;
+    z-index: 999;
+    transition: background 0.3s, transform 0.2s;
 }
 
-.panel-toggle:hover {
+.panel-toggle-btn.visible {
+    display: flex;
+}
+
+.panel-toggle-btn:hover {
     background: #f0f0f0;
+    transform: scale(1.1);
+}
+
+.panel-toggle-btn:active {
+    transform: scale(0.95);
+}
+
+.panel-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    width: 30px;
+    height: 30px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.3s, color 0.3s;
+}
+
+.panel-close:hover {
+    background: #f0f0f0;
+    color: #333;
 }
 
 .control-panel h3 {
@@ -189,42 +224,45 @@ body {
     z-index: 1000;
     font-size: 13px;
     min-width: 240px;
-    transition: transform 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
 }
 
-.legend.minimized {
-    transform: translateX(calc(100% - 60px));
+.legend.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.9);
 }
 
-.legend-toggle {
+.legend-toggle-btn {
     position: absolute;
-    left: -40px;
-    top: 18px;
+    bottom: 30px;
+    right: 20px;
     background: white;
     border: none;
-    width: 40px;
-    height: 40px;
-    border-radius: 8px 0 0 8px;
-    box-shadow: -2px 0 8px rgba(0,0,0,0.15);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     cursor: pointer;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
-    transition: background 0.3s;
+    font-size: 24px;
+    z-index: 999;
+    transition: background 0.3s, transform 0.2s;
 }
 
-.legend-toggle:hover {
+.legend-toggle-btn.visible {
+    display: flex;
+}
+
+.legend-toggle-btn:hover {
     background: #f0f0f0;
+    transform: scale(1.1);
 }
 
-.legend-content {
-    transition: opacity 0.3s ease;
-}
-
-.legend.minimized .legend-content {
-    opacity: 0;
-    pointer-events: none;
+.legend-toggle-btn:active {
+    transform: scale(0.95);
 }
 
 .legend h4 {
@@ -355,42 +393,45 @@ body {
     z-index: 1000;
     font-size: 12px;
     max-width: 320px;
-    transition: transform 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
 }
 
-.credits.minimized {
-    transform: translateX(calc(-100% + 60px));
+.credits.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.9);
 }
 
-.credits-toggle {
+.credits-toggle-btn {
     position: absolute;
-    right: -40px;
-    top: 12px;
+    bottom: 30px;
+    left: 20px;
     background: white;
     border: none;
-    width: 40px;
-    height: 40px;
-    border-radius: 0 8px 8px 0;
-    box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     cursor: pointer;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
-    transition: background 0.3s;
+    font-size: 24px;
+    z-index: 999;
+    transition: background 0.3s, transform 0.2s;
 }
 
-.credits-toggle:hover {
+.credits-toggle-btn.visible {
+    display: flex;
+}
+
+.credits-toggle-btn:hover {
     background: #f0f0f0;
+    transform: scale(1.1);
 }
 
-.credits-content {
-    transition: opacity 0.3s ease;
-}
-
-.credits.minimized .credits-content {
-    opacity: 0;
-    pointer-events: none;
+.credits-toggle-btn:active {
+    transform: scale(0.95);
 }
 
 .credits-title {
@@ -415,38 +456,37 @@ body {
         left: 10px;
         top: 10px;
         min-width: 280px;
-        max-width: calc(100vw - 80px);
+        max-width: calc(100vw - 20px);
         padding: 15px;
+        padding-top: 45px;
     }
 
-    .control-panel.minimized {
-        transform: translateX(calc(-100% + 50px));
+    .panel-toggle-btn {
+        top: 10px;
+        left: 10px;
+        width: 45px;
+        height: 45px;
+        font-size: 22px;
     }
 
-    .panel-toggle {
-        right: -35px;
-        width: 35px;
-        height: 35px;
-        font-size: 18px;
+    .panel-close {
+        display: flex;
     }
 
     .legend {
         bottom: 20px;
         right: 10px;
         min-width: 200px;
-        max-width: calc(100vw - 80px);
+        max-width: calc(100vw - 20px);
         padding: 12px;
     }
 
-    .legend.minimized {
-        transform: translateX(calc(100% - 50px));
-    }
-
-    .legend-toggle {
-        left: -35px;
-        width: 35px;
-        height: 35px;
-        font-size: 18px;
+    .legend-toggle-btn {
+        bottom: 20px;
+        right: 10px;
+        width: 45px;
+        height: 45px;
+        font-size: 22px;
     }
 
     .legend h4 {
@@ -470,19 +510,16 @@ body {
     .credits {
         bottom: 20px;
         left: 10px;
-        max-width: calc(100vw - 80px);
+        max-width: calc(100vw - 20px);
         padding: 10px 12px;
     }
 
-    .credits.minimized {
-        transform: translateX(calc(-100% + 50px));
-    }
-
-    .credits-toggle {
-        right: -35px;
-        width: 35px;
-        height: 35px;
-        font-size: 16px;
+    .credits-toggle-btn {
+        bottom: 20px;
+        left: 10px;
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
     }
 
     .control-panel h3 {
@@ -505,21 +542,25 @@ body {
         padding: 8px;
     }
 
-    /* Ocultar créditos en móviles por defecto para no obstruir */
+    /* Ocultar créditos en móviles por defecto */
     .credits {
-        transform: translateX(calc(-100% + 50px));
+        display: none;
+    }
+
+    .credits.hidden {
+        display: block;
     }
 }
 
 @media (max-width: 480px) {
     .control-panel {
-        min-width: 240px;
-        max-width: calc(100vw - 70px);
+        min-width: 260px;
+        max-width: calc(100vw - 20px);
     }
 
     .legend {
         min-width: 180px;
-        max-width: calc(100vw - 70px);
+        max-width: calc(100vw - 20px);
     }
 
     .popup-image {
