@@ -171,6 +171,41 @@ body {
     background: #c0392b;
 }
 
+/* Botón de ubicación */
+.btn-location {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    background: #17a2b8;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.btn-location:hover {
+    background: #138496;
+    transform: translateY(-1px);
+}
+
+.btn-location:active {
+    transform: translateY(0);
+}
+
+/* Información de ubicación */
+.location-info {
+    margin-top: 10px;
+    padding: 10px;
+    background: #d1ecf1;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #0c5460;
+    border-left: 4px solid #17a2b8;
+}
+
 .status {
     margin-top: 15px;
     padding: 12px;
@@ -406,7 +441,7 @@ body {
 .credits-toggle-btn {
     position: absolute;
     bottom: 30px;
-    left: 200px;
+    left: 20px;
     background: white;
     border: none;
     width: 50px;
@@ -593,10 +628,15 @@ body {
         padding: 8px;
     }
 
-    /* Ajuste de zoom en móviles - MEDIO IZQUIERDO */
+    .btn-location {
+        font-size: 13px;
+        padding: 8px;
+    }
+
+    /* Ajuste de zoom en móviles */
     .leaflet-control-zoom {
         position: fixed !important;
-        top:20% !important;
+        top: 20% !important;
         right: 10px !important;
         transform: translateY(-50%) !important;
         margin: 0 !important;
