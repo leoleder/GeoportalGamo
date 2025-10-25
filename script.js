@@ -155,6 +155,8 @@ async function cargarCapa() {
         // Crear capa de marcadores
         capaActual = L.layerGroup();
         
+        let puntoNumero = 0; // Contador de puntos
+        
         data.forEach(feature => {
             if (feature[geomField]) {
                 try {
@@ -163,6 +165,8 @@ async function cargarCapa() {
                         : feature[geomField];
                     
                     if (geom.type === 'Point') {
+                        puntoNumero++; // Incrementar contador
+                        
                         const [lon, lat] = geom.coordinates;
                         const estado = feature.estado || 'Otro estado';
                         
@@ -170,9 +174,23 @@ async function cargarCapa() {
                             icon: createCustomIcon(estado)
                         });
                         
-                        // Crear popup
-                        let popupContent = `<div class="popup-title">📍 ${feature.nombre || 'Cámara Pluvial'}</div>`;
+                        // Crear popup con enumeración y coordenadas
+                        let popupContent = `<div class="popup-title">📍 Punto ${puntoNumero}</div>`;
                         
+                        // Agregar Latitud y Longitud al inicio
+                        popupContent += `
+                            <div class="popup-row">
+                                <span class="popup-label">Latitud:</span>
+                                <span class="popup-value">${lat.toFixed(6)}</span>
+                            </div>
+                            <div class="popup-row">
+                                <span class="popup-label">Longitud:</span>
+                                <span class="popup-value">${lon.toFixed(6)}</span>
+                            </div>
+                            <hr style="margin: 8px 0; border: none; border-top: 1px solid #e0e0e0;">
+                        `;
+                        
+                        // Agregar resto de atributos
                         Object.keys(feature).forEach(key => {
                             if (key !== geomField && feature[key] !== null && feature[key] !== '') {
                                 if (key.toLowerCase().includes('img') || key.toLowerCase().includes('foto') || key.toLowerCase().includes('imagen')) {
@@ -212,11 +230,11 @@ async function cargarCapa() {
         
         // Actualizar UI
         document.getElementById('btnLimpiar').style.display = 'block';
-        document.getElementById('totalPuntos').textContent = data.length;
+        document.getElementById('totalPuntos').textContent = puntoNumero;
         document.getElementById('ultimaActualizacion').textContent = new Date().toLocaleString('es-BO');
         document.getElementById('infoPanel').style.display = 'block';
         
-        mostrarEstado(`✅ Se cargaron ${data.length} puntos correctamente`, 'success');
+        mostrarEstado(`✅ Se cargaron ${puntoNumero} puntos correctamente`, 'success');
         
     } catch (error) {
         console.error('Error:', error);
@@ -616,13 +634,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Ajustar responsive en cambio de tamaño de ventana
     window.addEventListener('resize', function() {
         // Los paneles siempre son retráctiles en cualquier tamaño de pantalla
-        // Solo ajustamos el posicionamiento si es necesario
-        if (window.innerWidth <= 768) {
-            // Asegurar que los controles estén en la posición correcta para móvil
-            const zoomControl = document.querySelector('.leaflet-control-zoom');
-            if (zoomControl) {
-                zoomControl.style.top = '20%';
+        // Ajustamos el posicionamiento del zoom para que esté centrado verticalmente
+        const zoomControl = document.querySelector('.leaflet-control-zoom');
+        if (zoomControl) {
+            zoomControl.style.position = 'fixed';
+            zoomControl.style.top = '50%';
+            zoomControl.style.transform = 'translateY(-50%)';
+            
+            if (window.innerWidth <= 768) {
                 zoomControl.style.right = '10px';
+            } else {
+                zoomControl.style.right = '20px';
             }
         }
     });
