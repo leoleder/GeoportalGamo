@@ -350,25 +350,24 @@ function togglePanel(panelId) {
     }
 }
 
-// Inicializar paneles en dispositivos móviles
+// Inicializar paneles - todos retráctiles por defecto
 function initPanels() {
-    if (window.innerWidth <= 768) {
-        // Ocultar paneles en móvil
-        document.getElementById('controlPanel').classList.add('hidden');
-        document.getElementById('legendPanel').classList.add('hidden');
-        document.getElementById('creditsPanel').classList.add('hidden');
-        document.getElementById('routePanel').classList.add('hidden');
-        
-        // Mostrar botones de toggle
-        document.getElementById('panelToggleBtn').classList.add('visible');
-        document.getElementById('legendToggleBtn').classList.add('visible');
-        document.getElementById('creditsToggleBtn').classList.add('visible');
-        
-        // Mostrar botón de cierre en todos los paneles
-        document.querySelectorAll('.panel-close').forEach(btn => {
-            btn.style.display = 'flex';
-        });
-    }
+    // Ocultar todos los paneles al inicio
+    document.getElementById('controlPanel').classList.add('hidden');
+    document.getElementById('legendPanel').classList.add('hidden');
+    document.getElementById('creditsPanel').classList.add('hidden');
+    document.getElementById('routePanel').classList.add('hidden');
+    
+    // Mostrar todos los botones de toggle
+    document.getElementById('panelToggleBtn').classList.add('visible');
+    document.getElementById('legendToggleBtn').classList.add('visible');
+    document.getElementById('creditsToggleBtn').classList.add('visible');
+    document.getElementById('routeToggleBtn').classList.add('visible');
+    
+    // Mostrar botones de cierre en todos los paneles
+    document.querySelectorAll('.panel-close').forEach(btn => {
+        btn.classList.add('visible');
+    });
 }
 
 // FUNCIONES DE RUTEO
@@ -561,25 +560,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Ajustar responsive en cambio de tamaño de ventana
     window.addEventListener('resize', function() {
+        // Los paneles siempre son retráctiles en cualquier tamaño de pantalla
+        // Solo ajustamos el posicionamiento si es necesario
         if (window.innerWidth <= 768) {
-            if (!document.getElementById('panelToggleBtn').classList.contains('visible')) {
-                initPanels();
+            // Asegurar que los controles estén en la posición correcta para móvil
+            const zoomControl = document.querySelector('.leaflet-control-zoom');
+            if (zoomControl) {
+                zoomControl.style.top = '20%';
+                zoomControl.style.right = '10px';
             }
-        } else {
-            // Mostrar paneles en desktop
-            document.getElementById('controlPanel').classList.remove('hidden');
-            document.getElementById('legendPanel').classList.remove('hidden');
-            document.getElementById('creditsPanel').classList.remove('hidden');
-            
-            // Ocultar botones de toggle
-            document.getElementById('panelToggleBtn').classList.remove('visible');
-            document.getElementById('legendToggleBtn').classList.remove('visible');
-            document.getElementById('creditsToggleBtn').classList.remove('visible');
-            
-            // Ocultar botones de cierre
-            document.querySelectorAll('.panel-close').forEach(btn => {
-                btn.style.display = 'none';
-            });
         }
     });
 });
