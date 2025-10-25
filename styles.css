@@ -58,7 +58,8 @@ body {
 }
 
 .panel-toggle-btn:hover {
-    background: #f0f0f0;
+    background: #667eea;
+    color: white;
     transform: scale(1.1);
 }
 
@@ -82,6 +83,10 @@ body {
     justify-content: center;
     border-radius: 50%;
     transition: background 0.3s, color 0.3s;
+}
+
+.panel-close.visible {
+    display: flex;
 }
 
 .panel-close:hover {
@@ -321,7 +326,8 @@ body {
 }
 
 .legend-toggle-btn:hover {
-    background: #f0f0f0;
+    background: #667eea;
+    color: white;
     transform: scale(1.1);
 }
 
@@ -491,7 +497,8 @@ body {
 }
 
 .credits-toggle-btn:hover {
-    background: #f0f0f0;
+    background: #667eea;
+    color: white;
     transform: scale(1.1);
 }
 
@@ -560,7 +567,7 @@ body {
     border-radius: 50%;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     cursor: pointer;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     font-size: 24px;
@@ -568,8 +575,13 @@ body {
     transition: background 0.3s, transform 0.2s;
 }
 
+.route-toggle-btn.visible {
+    display: flex;
+}
+
 .route-toggle-btn:hover {
-    background: #f0f0f0;
+    background: #667eea;
+    color: white;
     transform: scale(1.1);
 }
 
@@ -637,6 +649,48 @@ body {
     border: none !important;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
     margin-bottom: 100px !important;
+}
+
+/* Contenedor de botones flotantes izquierda */
+.floating-buttons-left {
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 999;
+}
+
+/* Contenedor de botones flotantes derecha */
+.floating-buttons-right {
+    position: absolute;
+    right: 20px;
+    bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 999;
+}
+
+/* Efecto de pulsación en botones */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    50% {
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.6);
+    }
+    100% {
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+}
+
+.panel-toggle-btn:hover,
+.route-toggle-btn:hover,
+.legend-toggle-btn:hover,
+.credits-toggle-btn:hover {
+    animation: pulse 1.5s infinite;
 }
 
 .leaflet-control-zoom a {
@@ -712,12 +766,6 @@ body {
         max-width: calc(100vw - 20px);
         padding: 15px;
         padding-top: 45px;
-    }
-
-    .panel-close {
-        display: flex;
-        top: 8px;
-        right: 8px;
     }
 
     .legend {
