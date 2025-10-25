@@ -58,7 +58,18 @@
             🗑️ Limpiar Capa
         </button>
         
+        <!-- Botón de ubicación -->
+        <button class="btn-location" onclick="obtenerUbicacion()" id="btnUbicacion">
+            📍 Mi Ubicación
+        </button>
+        
         <div id="status"></div>
+        
+        <!-- Panel de información de ubicación -->
+        <div class="location-info" id="locationInfo" style="display: none;">
+            <strong>📍 Tu ubicación:</strong><br>
+            <span id="coordenadas">-</span>
+        </div>
         
         <div class="info-panel" id="infoPanel" style="display: none;">
             <strong>Puntos cargados:</strong> <span id="totalPuntos">0</span><br>
