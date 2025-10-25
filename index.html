@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Geoportal - Cámaras Pluviales</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -40,7 +41,7 @@
             
             <div class="input-group">
                 <label>📊 Nombre de la tabla</label>
-                <input type="text" id="tabla" value="ci">
+                <input type="text" id="tabla" value="camaras">
             </div>
             
             <div class="input-group">
@@ -74,6 +75,84 @@
         <div class="info-panel" id="infoPanel" style="display: none;">
             <strong>Puntos cargados:</strong> <span id="totalPuntos">0</span><br>
             <strong>Última actualización:</strong> <span id="ultimaActualizacion">-</span>
+        </div>
+    </div>
+
+    <!-- Botón flotante para abrir panel de rutas -->
+    <button class="route-toggle-btn" id="routeToggleBtn" onclick="togglePanel('routePanel')" aria-label="Abrir panel de rutas">
+        🗺️
+    </button>
+
+    <!-- Panel de rutas -->
+    <div class="route-panel" id="routePanel">
+        <button class="panel-close" onclick="togglePanel('routePanel')" aria-label="Cerrar panel de rutas">
+            ✕
+        </button>
+        <h3>
+            <span>🚗</span>
+            <span>Calcular Ruta</span>
+        </h3>
+
+        <div class="route-mode-selector">
+            <label>Modo de transporte:</label>
+            <select id="routeProfile" class="route-select">
+                <option value="driving-car">🚗 Auto</option>
+                <option value="cycling-regular">🚴 Bicicleta</option>
+                <option value="foot-walking">🚶 A pie</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>📍 Desde (Origen)</label>
+            <div class="coordinate-input-group">
+                <input type="text" id="origenLat" placeholder="Latitud" class="coord-input">
+                <input type="text" id="origenLon" placeholder="Longitud" class="coord-input">
+            </div>
+            <button class="btn-small" onclick="usarUbicacionActual('origen')">
+                📍 Usar mi ubicación
+            </button>
+            <button class="btn-small" onclick="seleccionarEnMapa('origen')">
+                🎯 Seleccionar en mapa
+            </button>
+        </div>
+
+        <div class="input-group">
+            <label>🏁 Hacia (Destino)</label>
+            <div class="coordinate-input-group">
+                <input type="text" id="destinoLat" placeholder="Latitud" class="coord-input">
+                <input type="text" id="destinoLon" placeholder="Longitud" class="coord-input">
+            </div>
+            <button class="btn-small" onclick="seleccionarEnMapa('destino')">
+                🎯 Seleccionar en mapa
+            </button>
+        </div>
+
+        <button class="btn-primary" onclick="calcularRuta()">
+            <span>🗺️</span>
+            <span>Calcular Ruta</span>
+        </button>
+
+        <button class="btn-secondary" onclick="limpiarRuta()" style="display: none;" id="btnLimpiarRuta">
+            🗑️ Limpiar Ruta
+        </button>
+
+        <div id="routeStatus"></div>
+
+        <!-- Panel de información de ruta -->
+        <div class="route-info" id="routeInfo" style="display: none;">
+            <h4>📊 Información de la ruta</h4>
+            <div class="route-detail">
+                <strong>📏 Distancia:</strong>
+                <span id="routeDistance">-</span>
+            </div>
+            <div class="route-detail">
+                <strong>⏱️ Tiempo estimado:</strong>
+                <span id="routeDuration">-</span>
+            </div>
+            <div class="route-detail">
+                <strong>🚀 Tipo:</strong>
+                <span id="routeType">-</span>
+            </div>
         </div>
     </div>
 
