@@ -339,15 +339,16 @@ function toggleConfig() {
 // Alternar paneles
 function togglePanel(panelId) {
     const panel = document.getElementById(panelId);
-    const toggleBtn = document.getElementById(panelId.replace('Panel', 'ToggleBtn'));
     
     if (panel.classList.contains('hidden')) {
+        // Abrir panel
         panel.classList.remove('hidden');
-        if (toggleBtn) toggleBtn.classList.add('visible');
     } else {
+        // Cerrar panel
         panel.classList.add('hidden');
-        if (toggleBtn) toggleBtn.classList.remove('visible');
     }
+    
+    // Los botones siempre permanecen visibles
 }
 
 // Inicializar paneles - todos retráctiles por defecto
