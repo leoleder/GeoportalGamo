@@ -16,7 +16,7 @@ body {
 
 .control-panel {
     position: absolute;
-    top: 50%;
+    top: 20px;
     left: 45px;
     background: white;
     padding: 20px;
@@ -78,15 +78,11 @@ body {
     color: #666;
     width: 30px;
     height: 30px;
-    display: none;
+    display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
     transition: background 0.3s, color 0.3s;
-}
-
-.panel-close.visible {
-    display: flex;
 }
 
 .panel-close:hover {
