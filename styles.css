@@ -620,6 +620,8 @@ body {
     background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
     border-radius: 8px;
     border-left: 4px solid #667eea;
+    max-height: 400px;
+    overflow-y: auto;
 }
 
 .route-info h4 {
@@ -633,11 +635,22 @@ body {
     margin: 8px 0;
     font-size: 13px;
     color: #555;
+    padding: 8px;
+    background: white;
+    border-radius: 6px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.route-detail:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .route-detail strong {
     color: #333;
     margin-right: 5px;
+    display: block;
+    margin-bottom: 5px;
 }
 
 /* Personalización de controles de zoom */
@@ -651,7 +664,7 @@ body {
 .floating-buttons-left {
     position: absolute;
     left: 20px;
-    top: 50%;
+    top: 20px;
     display: flex;
     flex-direction: column;
     gap: 15px;
