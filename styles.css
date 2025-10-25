@@ -89,7 +89,8 @@ body {
     color: #333;
 }
 
-.control-panel h3 {
+.control-panel h3,
+.route-panel h3 {
     margin: 0 0 20px 0;
     font-size: 20px;
     color: #2c3e50;
@@ -102,7 +103,8 @@ body {
     margin-bottom: 15px;
 }
 
-.control-panel label {
+.control-panel label,
+.route-panel label {
     display: block;
     margin-bottom: 6px;
     font-size: 13px;
@@ -111,7 +113,9 @@ body {
 }
 
 .control-panel input,
-.control-panel select {
+.control-panel select,
+.route-panel input,
+.route-panel select {
     width: 100%;
     padding: 10px 12px;
     border: 2px solid #e0e0e0;
@@ -121,7 +125,9 @@ body {
 }
 
 .control-panel input:focus,
-.control-panel select:focus {
+.control-panel select:focus,
+.route-panel input:focus,
+.route-panel select:focus {
     outline: none;
     border-color: #3498db;
 }
@@ -195,6 +201,25 @@ body {
     transform: translateY(0);
 }
 
+/* Botones pequeños */
+.btn-small {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 12px;
+    transition: background 0.3s;
+}
+
+.btn-small:hover {
+    background: #5a6268;
+}
+
 /* Información de ubicación */
 .location-info {
     margin-top: 10px;
@@ -206,7 +231,8 @@ body {
     border-left: 4px solid #17a2b8;
 }
 
-.status {
+.status,
+#routeStatus {
     margin-top: 15px;
     padding: 12px;
     border-radius: 8px;
@@ -227,21 +253,24 @@ body {
     }
 }
 
-.status.success { 
+.status.success,
+#routeStatus.success { 
     background: #d4edda; 
     color: #155724;
     border-left: 4px solid #28a745;
     display: block;
 }
 
-.status.error { 
+.status.error,
+#routeStatus.error { 
     background: #f8d7da; 
     color: #721c24;
     border-left: 4px solid #dc3545;
     display: block;
 }
 
-.status.info { 
+.status.info,
+#routeStatus.info { 
     background: #d1ecf1; 
     color: #0c5460;
     border-left: 4px solid #17a2b8;
@@ -496,6 +525,113 @@ body {
     text-align: center;
 }
 
+/* Panel de rutas */
+.route-panel {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: white;
+    padding: 20px;
+    padding-top: 45px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    z-index: 1000;
+    max-width: 360px;
+    min-width: 320px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+}
+
+.route-panel.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.9);
+}
+
+.route-toggle-btn {
+    position: absolute;
+    top: 90px;
+    left: 20px;
+    background: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    z-index: 999;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.route-toggle-btn:hover {
+    background: #f0f0f0;
+    transform: scale(1.1);
+}
+
+.route-toggle-btn:active {
+    transform: scale(0.95);
+}
+
+.route-mode-selector {
+    margin-bottom: 15px;
+}
+
+.route-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border 0.3s;
+    margin-top: 6px;
+}
+
+.coordinate-input-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 5px;
+}
+
+.coord-input {
+    padding: 8px 10px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+/* Información de ruta */
+.route-info {
+    margin-top: 15px;
+    padding: 15px;
+    background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.route-info h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: #2c3e50;
+    font-weight: 700;
+}
+
+.route-detail {
+    margin: 8px 0;
+    font-size: 13px;
+    color: #555;
+}
+
+.route-detail strong {
+    color: #333;
+    margin-right: 5px;
+}
+
 /* Personalización de controles de zoom */
 .leaflet-control-zoom {
     border: none !important;
@@ -531,6 +667,17 @@ body {
     border-radius: 0 0 8px 8px !important;
 }
 
+/* Estilos para marcadores de ruta */
+.route-marker {
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
 /* Responsive Design para móviles */
 @media (max-width: 768px) {
     .control-panel {
@@ -548,6 +695,23 @@ body {
         width: 45px;
         height: 45px;
         font-size: 22px;
+    }
+
+    .route-toggle-btn {
+        top: 70px;
+        left: 10px;
+        width: 45px;
+        height: 45px;
+        font-size: 22px;
+    }
+
+    .route-panel {
+        right: 10px;
+        top: 10px;
+        min-width: 280px;
+        max-width: calc(100vw - 20px);
+        padding: 15px;
+        padding-top: 45px;
     }
 
     .panel-close {
@@ -608,12 +772,15 @@ body {
         font-size: 20px;
     }
 
-    .control-panel h3 {
+    .control-panel h3,
+    .route-panel h3 {
         font-size: 18px;
     }
 
     .control-panel input,
-    .control-panel select {
+    .control-panel select,
+    .route-panel input,
+    .route-panel select {
         font-size: 13px;
         padding: 8px 10px;
     }
@@ -650,7 +817,8 @@ body {
 }
 
 @media (max-width: 480px) {
-    .control-panel {
+    .control-panel,
+    .route-panel {
         min-width: 260px;
         max-width: calc(100vw - 20px);
     }
