@@ -1,6 +1,7 @@
 // Esperar a que el DOM esté completamente cargado
 let map;
 let capaActual = null;
+let marcadorUbicacion = null;
 
 // Inicializar el mapa cuando la página esté lista
 document.addEventListener('DOMContentLoaded', function() {
@@ -98,6 +99,121 @@ function toggleConfig() {
         panel.style.display = 'none';
         btn.textContent = '⚙️ Mostrar Configuración';
     }
+}
+
+// Función para obtener la ubicación del usuario
+function obtenerUbicacion() {
+    if (!navigator.geolocation) {
+        mostrarStatus('error', '❌ Tu navegador no soporta geolocalización');
+        return;
+    }
+
+    mostrarStatus('info', '📍 Obteniendo tu ubicación...');
+
+    navigator.geolocation.getCurrentPosition(
+        // Si tiene éxito
+        (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const precision = position.coords.accuracy;
+
+            // Mostrar coordenadas
+            document.getElementById('coordenadas').textContent = 
+                `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)} (±${precision.toFixed(0)}m)`;
+            document.getElementById('locationInfo').style.display = 'block';
+
+            // Centrar el mapa en la ubicación
+            map.setView([lat, lng], 16);
+
+            // Eliminar marcador anterior si existe
+            if (marcadorUbicacion) {
+                map.removeLayer(marcadorUbicacion);
+            }
+
+            // Crear ícono personalizado para ubicación
+            const iconoUbicacion = L.divIcon({
+                html: `
+                    <div style="
+                        width: 20px; 
+                        height: 20px; 
+                        background: #17a2b8; 
+                        border: 3px solid white; 
+                        border-radius: 50%;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                    "></div>
+                    <div style="
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        width: 40px;
+                        height: 40px;
+                        background: rgba(23, 162, 184, 0.2);
+                        border-radius: 50%;
+                        animation: pulse 2s infinite;
+                    "></div>
+                `,
+                className: '',
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            });
+
+            // Agregar marcador en la ubicación actual
+            marcadorUbicacion = L.marker([lat, lng], { icon: iconoUbicacion })
+                .addTo(map)
+                .bindPopup(`
+                    <div class="popup-title">📍 Tu Ubicación</div>
+                    <div class="popup-row">
+                        <div class="popup-label">Latitud:</div>
+                        <div class="popup-value">${lat.toFixed(6)}°</div>
+                    </div>
+                    <div class="popup-row">
+                        <div class="popup-label">Longitud:</div>
+                        <div class="popup-value">${lng.toFixed(6)}°</div>
+                    </div>
+                    <div class="popup-row">
+                        <div class="popup-label">Precisión:</div>
+                        <div class="popup-value">±${precision.toFixed(0)} metros</div>
+                    </div>
+                `)
+                .openPopup();
+
+            // Agregar círculo de precisión
+            L.circle([lat, lng], {
+                radius: precision,
+                color: '#17a2b8',
+                fillColor: '#17a2b8',
+                fillOpacity: 0.1,
+                weight: 2
+            }).addTo(map);
+
+            mostrarStatus('success', '✅ Ubicación obtenida correctamente');
+        },
+        // Si hay error
+        (error) => {
+            let mensaje = '';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    mensaje = '❌ Permiso denegado. Activa la ubicación en tu navegador.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    mensaje = '❌ Ubicación no disponible.';
+                    break;
+                case error.TIMEOUT:
+                    mensaje = '❌ Tiempo de espera agotado.';
+                    break;
+                default:
+                    mensaje = '❌ Error desconocido al obtener ubicación.';
+            }
+            mostrarStatus('error', mensaje);
+        },
+        // Opciones
+        {
+            enableHighAccuracy: true,  // Máxima precisión (usa GPS)
+            timeout: 10000,             // 10 segundos máximo
+            maximumAge: 0               // No usar caché
+        }
+    );
 }
 
 function crearIconoCamara(color) {
