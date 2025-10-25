@@ -16,7 +16,7 @@ body {
 
 .control-panel {
     position: absolute;
-    top: 20px;
+    top: 50%;
     left: 45px;
     background: white;
     padding: 20px;
