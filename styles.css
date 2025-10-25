@@ -657,7 +657,11 @@ body {
 .leaflet-control-zoom {
     border: none !important;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-    margin-bottom: 100px !important;
+    margin: 0 !important;
+    position: fixed !important;
+    top: 50% !important;
+    right: 20px !important;
+    transform: translateY(-50%) !important;
 }
 
 /* Contenedor de botones flotantes izquierda */
@@ -860,7 +864,7 @@ body {
     /* Ajuste de zoom en móviles */
     .leaflet-control-zoom {
         position: fixed !important;
-        top: 20% !important;
+        top: 50% !important;
         right: 10px !important;
         transform: translateY(-50%) !important;
         margin: 0 !important;
