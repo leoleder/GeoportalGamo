@@ -651,7 +651,7 @@ body {
 .floating-buttons-left {
     position: absolute;
     left: 20px;
-    top: 20px;
+    top: 50%;
     display: flex;
     flex-direction: column;
     gap: 15px;
