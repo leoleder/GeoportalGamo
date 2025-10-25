@@ -363,11 +363,6 @@ function initPanels() {
     document.getElementById('legendToggleBtn').classList.add('visible');
     document.getElementById('creditsToggleBtn').classList.add('visible');
     document.getElementById('routeToggleBtn').classList.add('visible');
-    
-    // Mostrar botones de cierre en todos los paneles
-    document.querySelectorAll('.panel-close').forEach(btn => {
-        btn.classList.add('visible');
-    });
 }
 
 // FUNCIONES DE RUTEO
