@@ -2,11 +2,11 @@
 let map;
 let capaActual = null;
 let userLocation = null;
-let routeLayer = null;
+let routeLayers = []; // Array para múltiples rutas
 let origenMarker = null;
 let destinoMarker = null;
 let seleccionandoPunto = null;
-let currentRoute = null;
+let currentRoutes = []; // Array para guardar múltiples rutas
 
 // Iconos personalizados para marcadores de ruta
 const origenIcon = L.divIcon({
@@ -430,7 +430,7 @@ function agregarPuntoSeleccionado(latlng) {
     seleccionandoPunto = null;
 }
 
-// Calcular ruta usando OpenRouteService
+// Calcular ruta usando OpenRouteService con rutas alternativas
 async function calcularRuta() {
     const origenLat = parseFloat(document.getElementById('origenLat').value);
     const origenLon = parseFloat(document.getElementById('origenLon').value);
@@ -444,12 +444,14 @@ async function calcularRuta() {
         return;
     }
     
-    mostrarEstadoRuta('🔄 Calculando ruta...', 'info');
+    mostrarEstadoRuta('🔄 Calculando rutas alternativas...', 'info');
     
     try {
-        // Usar API de OpenRouteService (necesitas obtener una API key gratuita)
-        // Para este ejemplo, usaremos OSRM que es público
-        const url = `https://router.project-osrm.org/route/v1/${profile === 'driving-car' ? 'driving' : profile === 'cycling-regular' ? 'cycling' : 'foot'}/${origenLon},${origenLat};${destinoLon},${destinoLat}?overview=full&geometries=geojson`;
+        // Convertir perfil para OSRM
+        const osrmProfile = profile === 'driving-car' ? 'driving' : profile === 'cycling-regular' ? 'cycling' : 'foot';
+        
+        // Solicitar rutas alternativas
+        const url = `https://router.project-osrm.org/route/v1/${osrmProfile}/${origenLon},${origenLat};${destinoLon},${destinoLat}?overview=full&geometries=geojson&alternatives=true&steps=true`;
         
         const response = await fetch(url);
         
@@ -457,27 +459,52 @@ async function calcularRuta() {
         
         const data = await response.json();
         
-        if (data.code !== 'Ok') {
+        if (data.code !== 'Ok' || !data.routes || data.routes.length === 0) {
             throw new Error('No se pudo encontrar una ruta');
         }
         
-        const route = data.routes[0];
-        currentRoute = route;
+        const routes = data.routes;
+        currentRoutes = routes;
         
-        // Limpiar ruta anterior
-        if (routeLayer) {
-            map.removeLayer(routeLayer);
-        }
+        // Limpiar rutas anteriores
+        routeLayers.forEach(layer => map.removeLayer(layer));
+        routeLayers = [];
         
-        // Dibujar ruta en el mapa
-        const coordinates = route.geometry.coordinates.map(coord => [coord[1], coord[0]]);
+        // Colores para diferentes rutas
+        const routeColors = [
+            { color: '#667eea', name: 'Ruta Principal', weight: 6, opacity: 0.8 },
+            { color: '#28a745', name: 'Ruta Alternativa 1', weight: 5, opacity: 0.7 },
+            { color: '#ffc107', name: 'Ruta Alternativa 2', weight: 5, opacity: 0.7 }
+        ];
         
-        routeLayer = L.polyline(coordinates, {
-            color: '#667eea',
-            weight: 5,
-            opacity: 0.7,
-            smoothFactor: 1
-        }).addTo(map);
+        // Dibujar todas las rutas en el mapa
+        routes.forEach((route, index) => {
+            if (index < 3) { // Máximo 3 rutas
+                const coordinates = route.geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                const style = routeColors[index];
+                
+                const routeLayer = L.polyline(coordinates, {
+                    color: style.color,
+                    weight: style.weight,
+                    opacity: style.opacity,
+                    smoothFactor: 1
+                }).addTo(map);
+                
+                // Agregar popup con información de la ruta
+                const distanceKm = (route.distance / 1000).toFixed(2);
+                const durationMin = Math.round(route.duration / 60);
+                
+                routeLayer.bindPopup(`
+                    <div style="text-align: center;">
+                        <strong>${style.name}</strong><br>
+                        📏 ${distanceKm} km<br>
+                        ⏱️ ${durationMin} min
+                    </div>
+                `);
+                
+                routeLayers.push(routeLayer);
+            }
+        });
         
         // Agregar marcadores de origen y destino si no existen
         if (!origenMarker) {
@@ -490,25 +517,58 @@ async function calcularRuta() {
             destinoMarker.bindPopup('🏁 Destino');
         }
         
-        // Ajustar vista a la ruta
-        map.fitBounds(routeLayer.getBounds(), { padding: [50, 50] });
+        // Ajustar vista a todas las rutas
+        const allCoordinates = [];
+        routes.forEach(route => {
+            route.geometry.coordinates.forEach(coord => {
+                allCoordinates.push([coord[1], coord[0]]);
+            });
+        });
         
-        // Mostrar información de la ruta
-        const distanceKm = (route.distance / 1000).toFixed(2);
-        const durationMin = Math.round(route.duration / 60);
+        if (allCoordinates.length > 0) {
+            const bounds = L.latLngBounds(allCoordinates);
+            map.fitBounds(bounds, { padding: [50, 50] });
+        }
         
-        document.getElementById('routeDistance').textContent = `${distanceKm} km`;
-        document.getElementById('routeDuration').textContent = `${durationMin} minutos`;
-        document.getElementById('routeType').textContent = getProfileName(profile);
-        document.getElementById('routeInfo').style.display = 'block';
+        // Mostrar información de todas las rutas
+        mostrarInformacionRutas(routes, profile);
+        
         document.getElementById('btnLimpiarRuta').style.display = 'block';
         
-        mostrarEstadoRuta(`✅ Ruta calculada: ${distanceKm} km, ${durationMin} min`, 'success');
+        const numRutas = Math.min(routes.length, 3);
+        mostrarEstadoRuta(`✅ Se encontraron ${numRutas} ruta(s) alternativa(s)`, 'success');
         
     } catch (error) {
         console.error('Error:', error);
         mostrarEstadoRuta('❌ Error al calcular ruta: ' + error.message, 'error');
     }
+}
+
+// Mostrar información de múltiples rutas
+function mostrarInformacionRutas(routes, profile) {
+    const routeInfoDiv = document.getElementById('routeInfo');
+    routeInfoDiv.innerHTML = '<h4>📊 Rutas Encontradas</h4>';
+    
+    const routeNames = ['Principal', 'Alternativa 1', 'Alternativa 2'];
+    const routeColors = ['#667eea', '#28a745', '#ffc107'];
+    
+    routes.forEach((route, index) => {
+        if (index < 3) {
+            const distanceKm = (route.distance / 1000).toFixed(2);
+            const durationMin = Math.round(route.duration / 60);
+            
+            routeInfoDiv.innerHTML += `
+                <div class="route-detail" style="border-left: 4px solid ${routeColors[index]}; padding-left: 10px; margin: 10px 0;">
+                    <strong style="color: ${routeColors[index]};">Ruta ${routeNames[index]}</strong><br>
+                    📏 Distancia: <span>${distanceKm} km</span><br>
+                    ⏱️ Tiempo: <span>${durationMin} minutos</span><br>
+                    🚀 Tipo: <span>${getProfileName(profile)}</span>
+                </div>
+            `;
+        }
+    });
+    
+    routeInfoDiv.style.display = 'block';
 }
 
 // Obtener nombre del perfil de ruta
@@ -523,10 +583,9 @@ function getProfileName(profile) {
 
 // Limpiar ruta
 function limpiarRuta() {
-    if (routeLayer) {
-        map.removeLayer(routeLayer);
-        routeLayer = null;
-    }
+    // Limpiar todas las rutas
+    routeLayers.forEach(layer => map.removeLayer(layer));
+    routeLayers = [];
     
     if (origenMarker) {
         map.removeLayer(origenMarker);
@@ -545,9 +604,9 @@ function limpiarRuta() {
     document.getElementById('routeInfo').style.display = 'none';
     document.getElementById('btnLimpiarRuta').style.display = 'none';
     
-    currentRoute = null;
+    currentRoutes = [];
     
-    mostrarEstadoRuta('🗑️ Ruta limpiada', 'info');
+    mostrarEstadoRuta('🗑️ Rutas limpiadas', 'info');
 }
 
 // Inicializar aplicación al cargar
