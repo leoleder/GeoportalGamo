@@ -17,7 +17,7 @@ body {
 .control-panel {
     position: absolute;
     top: 20px;
-    left: 45px;
+    left: 80px;
     background: white;
     padding: 20px;
     border-radius: 12px;
@@ -281,7 +281,7 @@ body {
 .legend {
     position: absolute;
     bottom: 30px;
-    right: 20px;
+    right: 80px;
     background: white;
     padding: 18px;
     border-radius: 12px;
@@ -451,7 +451,7 @@ body {
 .credits {
     position: absolute;
     bottom: 30px;
-    left: 20px;
+    left: 80px;
     background: white;
     padding: 12px 16px;
     padding-top: 35px;
@@ -531,8 +531,8 @@ body {
 /* Panel de rutas */
 .route-panel {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 100px;
+    left: 80px;
     background: white;
     padding: 20px;
     padding-top: 45px;
@@ -541,7 +541,7 @@ body {
     z-index: 1000;
     max-width: 360px;
     min-width: 320px;
-    max-height: calc(100vh - 40px);
+    max-height: calc(100vh - 120px);
     overflow-y: auto;
     transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
 }
@@ -554,7 +554,7 @@ body {
 
 .route-toggle-btn {
     position: absolute;
-    top: 90px;
+    top: 160px;
     left: 20px;
     background: white;
     border: none;
@@ -748,7 +748,7 @@ body {
     }
 
     .route-toggle-btn {
-        top: 70px;
+        top: 130px;
         left: 10px;
         width: 45px;
         height: 45px;
