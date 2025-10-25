@@ -451,6 +451,16 @@ body {
     margin: 2px 0;
 }
 
+/* Estilo para la ubicación en los créditos */
+.credits-location {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #e0e0e0;
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+}
+
 /* Personalización de controles de zoom */
 .leaflet-control-zoom {
     border: none !important;
