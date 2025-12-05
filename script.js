@@ -84,13 +84,76 @@ function initMap() {
         maxZoom: 19
     });
     
+    // Capa de Google Satellite
+    const googleSatellite = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+        attribution: '© Google',
+        maxZoom: 20
+    });
+    
+    // Capa de Google Hybrid (Satélite + Calles)
+    const googleHybrid = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+        attribution: '© Google',
+        maxZoom: 20
+    });
+    
+    // Capa de Google Streets
+    const googleStreets = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+        attribution: '© Google',
+        maxZoom: 20
+    });
+    
+    // Capa de Google Terrain
+    const googleTerrain = L.tileLayer('https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {
+        attribution: '© Google',
+        maxZoom: 20
+    });
+    
+    // Capa topográfica de OpenTopoMap
+    const topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenTopoMap',
+        maxZoom: 17
+    });
+    
+    // Capa oscura de CartoDB
+    const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '© CartoDB',
+        maxZoom: 19
+    });
+    
+    // Capa clara de CartoDB
+    const lightLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '© CartoDB',
+        maxZoom: 19
+    });
+    
+    // Capa de Esri Topográfico
+    const esriTopo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '© Esri',
+        maxZoom: 19
+    });
+    
+    // Capa de Esri Calles
+    const esriStreets = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '© Esri',
+        maxZoom: 19
+    });
+    
     // Añadir capa base por defecto
     osmLayer.addTo(map);
     
     // Control de capas
     const baseLayers = {
-        "Mapa de Calles": osmLayer,
-        "Vista Satelital": satelliteLayer
+        "🗺️ OpenStreetMap": osmLayer,
+        "🛰️ Esri Satélite": satelliteLayer,
+        "🛰️ Google Satélite": googleSatellite,
+        "🗺️ Google Híbrido": googleHybrid,
+        "🛣️ Google Calles": googleStreets,
+        "⛰️ Google Terreno": googleTerrain,
+        "🏔️ OpenTopoMap": topoLayer,
+        "🌙 Modo Oscuro": darkLayer,
+        "☀️ Modo Claro": lightLayer,
+        "🗻 Esri Topográfico": esriTopo,
+        "🛤️ Esri Calles": esriStreets
     };
     
     L.control.layers(baseLayers).addTo(map);
@@ -218,8 +281,17 @@ async function cargarCapa() {
                             icon: createCustomIcon(accesibili)
                         });
                         
-                        // Crear popup con título
-                        let popupContent = `<div class="popup-title">📍 Cámara ${feature.cod_cam || puntoNumero}</div>`;
+                        // Obtener color según accesibilidad
+                        const colorMap = {
+                            'accesible operativo': '#28a745',
+                            'accesible con dificultad': '#ffc107',
+                            'inferido': '#6c757d',
+                            'no accesible': '#dc3545'
+                        };
+                        const colorAccesibilidad = colorMap[accesibili?.toLowerCase()] || '#17a2b8';
+                        
+                        // Crear popup con título y color dinámico
+                        let popupContent = `<div class="popup-title" style="background: ${colorAccesibilidad};">📍 Cámara ${feature.cod_cam || puntoNumero}</div>`;
                         
                         // Debug: mostrar todos los campos disponibles
                         console.log('Campos disponibles:', Object.keys(feature));
@@ -243,11 +315,11 @@ async function cargarCapa() {
                             const imageUrl = convertDriveUrl(fotoUrl);
                             console.log('URL convertida:', imageUrl);
                             popupContent += `
-                                <div class="popup-image-container">
-                                    <img src="${imageUrl}" class="popup-image" alt="Foto de cámara" 
+                                <div class="popup-image-container" style="border-color: ${colorAccesibilidad};">
+                                    <img src="${imageUrl}" class="popup-image" style="border-color: ${colorAccesibilidad};" alt="Foto de cámara" 
                                          onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';" 
                                          onclick="window.open('${fotoUrl}', '_blank')">
-                                    <a href="${fotoUrl}" target="_blank" class="popup-image-link" style="display:none;">📷 Ver imagen en Drive</a>
+                                    <a href="${fotoUrl}" target="_blank" class="popup-image-link" style="background: ${colorAccesibilidad}; display:none;">📷 Ver imagen en Drive</a>
                                 </div>
                             `;
                         }
@@ -324,14 +396,13 @@ async function cargarCapa() {
                             </div>
                         `;
                         
-                        // Envolver contenido en un div con scroll
-                        popupContent = `<div class="popup-scroll-container">${popupContent}</div>`;
+                        // Envolver contenido en un div con scroll y color personalizado
+                        popupContent = `<div class="popup-scroll-container" data-color="${colorAccesibilidad}">${popupContent}</div>`;
                         
                         marker.bindPopup(popupContent, {
-                            maxWidth: 350,
-                            maxHeight: 400,
                             autoPan: true,
-                            className: 'custom-popup'
+                            autoPanPadding: [50, 50],
+                            className: `popup-${accesibili?.toLowerCase().replace(/\s+/g, '-') || 'default'}`
                         });
                         marker.addTo(capaActual);
                     }
