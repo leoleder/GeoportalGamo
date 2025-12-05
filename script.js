@@ -8,6 +8,50 @@ let destinoMarker = null;
 let seleccionandoPunto = null;
 let currentRoutes = []; // Array para guardar múltiples rutas
 
+// Función para convertir URLs de Google Drive a URLs de imagen directa
+function convertDriveUrl(url) {
+    if (!url || typeof url !== 'string') return url;
+    
+    let fileId = null;
+    
+    // Patrón 1: https://drive.google.com/file/d/FILE_ID/view...
+    let match = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (match) {
+        fileId = match[1];
+    }
+    
+    // Patrón 2: https://drive.google.com/open?id=FILE_ID
+    if (!fileId) {
+        match = url.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
+        if (match) {
+            fileId = match[1];
+        }
+    }
+    
+    // Patrón 3: id=FILE_ID en cualquier parte de la URL (funciona para uc?export=download&id=XXX)
+    if (!fileId) {
+        match = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        if (match) {
+            fileId = match[1];
+        }
+    }
+    
+    // Patrón 4: ID directo (solo letras, números, guiones y guiones bajos, min 20 chars)
+    if (!fileId && /^[a-zA-Z0-9_-]{20,}$/.test(url.trim())) {
+        fileId = url.trim();
+    }
+    
+    // Si encontramos un ID, devolver URL de imagen directa
+    if (fileId) {
+        console.log('ID encontrado:', fileId);
+        // Usar thumbnail de Google Drive con tamaño grande
+        return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+    }
+    
+    // Si no coincide con ningún patrón de Drive, devolver URL original
+    return url;
+}
+
 // Iconos personalizados para marcadores de ruta
 const origenIcon = L.divIcon({
     className: 'route-marker',
@@ -25,8 +69,8 @@ const destinoIcon = L.divIcon({
 
 // Inicializar mapa
 function initMap() {
-    // Crear mapa centrado en La Paz, Bolivia
-    map = L.map('map').setView([-16.5000, -68.1500], 13);
+    // Crear mapa centrado en Oruro, Bolivia
+    map = L.map('map').setView([-17.9647, -67.1064], 14);
     
     // Capa base de OpenStreetMap
     const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -62,9 +106,9 @@ function initMap() {
     });
 }
 
-// Función de estilo para cámaras
+// Función de estilo para cámaras basado en campo "accesibili"
 function getStyle(feature) {
-    const estado = feature.properties?.estado?.toLowerCase() || 'otro';
+    const accesibili = feature.properties?.accesibili?.toLowerCase() || 'otro';
     
     const estilos = {
         'accesible operativo': { color: '#28a745', fillColor: '#28a745' },
@@ -75,16 +119,16 @@ function getStyle(feature) {
     
     return {
         radius: 8,
-        fillColor: estilos[estado]?.fillColor || '#17a2b8',
-        color: estilos[estado]?.color || '#17a2b8',
+        fillColor: estilos[accesibili]?.fillColor || '#17a2b8',
+        color: estilos[accesibili]?.color || '#17a2b8',
         weight: 2,
         opacity: 1,
         fillOpacity: 0.8
     };
 }
 
-// Crear icono SVG para marcadores
-function createCustomIcon(estado) {
+// Crear icono SVG para marcadores basado en campo "accesibili"
+function createCustomIcon(accesibili) {
     const colorMap = {
         'accesible operativo': '#28a745',
         'accesible con dificultad': '#ffc107',
@@ -92,7 +136,7 @@ function createCustomIcon(estado) {
         'no accesible': '#dc3545'
     };
     
-    const color = colorMap[estado?.toLowerCase()] || '#17a2b8';
+    const color = colorMap[accesibili?.toLowerCase()] || '#17a2b8';
     
     return L.divIcon({
         className: 'custom-marker',
@@ -168,16 +212,89 @@ async function cargarCapa() {
                         puntoNumero++; // Incrementar contador
                         
                         const [lon, lat] = geom.coordinates;
-                        const estado = feature.estado || 'Otro estado';
+                        const accesibili = feature.accesibili || 'Otro estado';
                         
                         const marker = L.marker([lat, lon], {
-                            icon: createCustomIcon(estado)
+                            icon: createCustomIcon(accesibili)
                         });
                         
-                        // Crear popup con enumeración y coordenadas
-                        let popupContent = `<div class="popup-title">📍 Punto ${puntoNumero}</div>`;
+                        // Crear popup con título
+                        let popupContent = `<div class="popup-title">📍 Cámara ${feature.cod_cam || puntoNumero}</div>`;
                         
-                        // Agregar Latitud y Longitud al inicio
+                        // 1. FOTO al inicio (usar campo 'fot_cam_q')
+                        if (feature.fot_cam_q) {
+                            const imageUrl = convertDriveUrl(feature.fot_cam_q);
+                            popupContent += `
+                                <div class="popup-image-container">
+                                    <img src="${imageUrl}" class="popup-image" alt="Foto de cámara" 
+                                         onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';" 
+                                         onclick="window.open('${feature.fot_cam_q}', '_blank')">
+                                    <a href="${feature.fot_cam_q}" target="_blank" class="popup-image-link" style="display:none;">📷 Ver imagen en Drive</a>
+                                </div>
+                            `;
+                        }
+                        
+                        // 2. Código de cámara
+                        if (feature.cod_cam) {
+                            popupContent += `
+                                <div class="popup-row">
+                                    <span class="popup-label">Código Cámara:</span>
+                                    <span class="popup-value">${feature.cod_cam}</span>
+                                </div>
+                            `;
+                        }
+                        
+                        // 3. Accesibilidad
+                        if (feature.accesibili) {
+                            popupContent += `
+                                <div class="popup-row">
+                                    <span class="popup-label">Accesibilidad:</span>
+                                    <span class="popup-value">${feature.accesibili}</span>
+                                </div>
+                            `;
+                        }
+                        
+                        // 4. Localización
+                        if (feature.localizaci) {
+                            popupContent += `
+                                <div class="popup-row">
+                                    <span class="popup-label">Localización:</span>
+                                    <span class="popup-value">${feature.localizaci}</span>
+                                </div>
+                            `;
+                        }
+                        
+                        // 5. Rasante
+                        if (feature.rasante) {
+                            popupContent += `
+                                <div class="popup-row">
+                                    <span class="popup-label">Rasante:</span>
+                                    <span class="popup-value">${feature.rasante}</span>
+                                </div>
+                            `;
+                        }
+                        
+                        // 6. Estado
+                        if (feature.estado) {
+                            popupContent += `
+                                <div class="popup-row">
+                                    <span class="popup-label">Estado:</span>
+                                    <span class="popup-value">${feature.estado}</span>
+                                </div>
+                            `;
+                        }
+                        
+                        // 7. Coordenadas (del campo si existe)
+                        if (feature.coordenadas) {
+                            popupContent += `
+                                <div class="popup-row">
+                                    <span class="popup-label">Coordenadas:</span>
+                                    <span class="popup-value">${feature.coordenadas}</span>
+                                </div>
+                            `;
+                        }
+                        
+                        // 8. Latitud y Longitud (calculadas de la geometría)
                         popupContent += `
                             <div class="popup-row">
                                 <span class="popup-label">Latitud:</span>
@@ -187,32 +304,17 @@ async function cargarCapa() {
                                 <span class="popup-label">Longitud:</span>
                                 <span class="popup-value">${lon.toFixed(6)}</span>
                             </div>
-                            <hr style="margin: 8px 0; border: none; border-top: 1px solid #e0e0e0;">
                         `;
                         
-                        // Agregar resto de atributos
-                        Object.keys(feature).forEach(key => {
-                            if (key !== geomField && feature[key] !== null && feature[key] !== '') {
-                                if (key.toLowerCase().includes('img') || key.toLowerCase().includes('foto') || key.toLowerCase().includes('imagen')) {
-                                    popupContent += `
-                                        <div class="popup-image-container">
-                                            <img src="${feature[key]}" class="popup-image" alt="Imagen" 
-                                                 onerror="this.style.display='none'" 
-                                                 onclick="window.open('${feature[key]}', '_blank')">
-                                        </div>
-                                    `;
-                                } else {
-                                    popupContent += `
-                                        <div class="popup-row">
-                                            <span class="popup-label">${key}:</span>
-                                            <span class="popup-value">${feature[key]}</span>
-                                        </div>
-                                    `;
-                                }
-                            }
-                        });
+                        // Envolver contenido en un div con scroll
+                        popupContent = `<div class="popup-scroll-container">${popupContent}</div>`;
                         
-                        marker.bindPopup(popupContent);
+                        marker.bindPopup(popupContent, {
+                            maxWidth: 350,
+                            maxHeight: 400,
+                            autoPan: true,
+                            className: 'custom-popup'
+                        });
                         marker.addTo(capaActual);
                     }
                 } catch (e) {
@@ -630,6 +732,11 @@ function limpiarRuta() {
 // Inicializar aplicación al cargar
 document.addEventListener('DOMContentLoaded', function() {
     initMap();
+    
+    // Cargar capa automáticamente al iniciar
+    setTimeout(() => {
+        cargarCapa();
+    }, 500);
     
     // Ajustar responsive en cambio de tamaño de ventana
     window.addEventListener('resize', function() {
