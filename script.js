@@ -396,6 +396,28 @@ async function cargarCapa() {
                             </div>
                         `;
                         
+                        // Botón para descargar ficha técnica
+                        const fichaData = JSON.stringify({
+                            cod_cam: feature.cod_cam || `CAM${puntoNumero}`,
+                            accesibili: feature.accesibili || 'Sin datos',
+                            localizaci: feature.localizaci || 'Sin datos',
+                            rasante: feature.rasante || 'Sin datos',
+                            estado: feature.estado || 'Sin datos',
+                            coordenadas: feature.coordenadas || 'Sin datos',
+                            lat: lat.toFixed(6),
+                            lon: lon.toFixed(6),
+                            fotoUrl: fotoUrl || '',
+                            color: colorAccesibilidad
+                        }).replace(/'/g, "\\'");
+                        
+                        popupContent += `
+                            <div class="popup-download-btn">
+                                <button onclick='generarFichaPDF(${fichaData})' class="btn-ficha">
+                                    📄 Descargar Ficha Técnica PDF
+                                </button>
+                            </div>
+                        `;
+                        
                         // Envolver contenido en un div con scroll y color personalizado
                         popupContent = `<div class="popup-scroll-container" data-color="${colorAccesibilidad}">${popupContent}</div>`;
                         
@@ -845,3 +867,252 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Función para generar Ficha Técnica en PDF
+function generarFichaPDF(data) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'letter'); // Tamaño carta vertical
+    
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    
+    // Colores según accesibilidad
+    const colorHex = data.color || '#17a2b8';
+    const rgb = hexToRgb(colorHex);
+    
+    // ========== ENCABEZADO ==========
+    // Fondo del encabezado
+    doc.setFillColor(26, 82, 118);
+    doc.rect(0, 0, pageWidth, 35, 'F');
+    
+    // Logo (círculo blanco)
+    doc.setFillColor(255, 255, 255);
+    doc.circle(25, 17.5, 12, 'F');
+    
+    // Texto del logo
+    doc.setTextColor(26, 82, 118);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.text('GAMO', 25, 15, { align: 'center' });
+    doc.text('ORURO', 25, 20, { align: 'center' });
+    
+    // Título
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('FICHA TÉCNICA - CÁMARA PLUVIAL', 45, 15);
+    
+    // Subtítulo
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Sistema de Drenaje Pluvial - Gobierno Autónomo Municipal de Oruro', 45, 23);
+    
+    // ========== BARRA DE CÓDIGO Y ESTADO ==========
+    doc.setFillColor(rgb.r, rgb.g, rgb.b);
+    doc.rect(0, 35, pageWidth, 18, 'F');
+    
+    // Código de cámara
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`📍 ${data.cod_cam}`, 15, 46);
+    
+    // Badge de estado
+    doc.setFillColor(255, 255, 255, 0.3);
+    const estadoText = data.accesibili.toUpperCase();
+    const estadoWidth = doc.getTextWidth(estadoText) + 16;
+    doc.roundedRect(pageWidth - estadoWidth - 15, 39, estadoWidth, 10, 3, 3, 'F');
+    doc.setFontSize(9);
+    doc.text(estadoText, pageWidth - 15, 45.5, { align: 'right' });
+    
+    // ========== SECCIÓN DE FOTO Y MAPA ==========
+    let yPos = 60;
+    
+    // Título Fotografía
+    doc.setTextColor(26, 82, 118);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('📷 FOTOGRAFÍA', 15, yPos);
+    
+    // Título Ubicación
+    doc.text('🗺️ UBICACIÓN', pageWidth/2 + 10, yPos);
+    
+    yPos += 5;
+    
+    // Recuadro de foto
+    doc.setDrawColor(rgb.r, rgb.g, rgb.b);
+    doc.setLineWidth(1);
+    doc.setFillColor(240, 240, 240);
+    doc.roundedRect(15, yPos, 80, 55, 3, 3, 'FD');
+    
+    // Texto placeholder de foto
+    doc.setTextColor(150, 150, 150);
+    doc.setFontSize(9);
+    doc.text('Imagen de la cámara', 55, yPos + 30, { align: 'center' });
+    
+    // Recuadro de mapa
+    doc.setDrawColor(41, 128, 185);
+    doc.setFillColor(212, 237, 218);
+    doc.roundedRect(pageWidth/2 + 10, yPos, 80, 55, 3, 3, 'FD');
+    
+    // Marcador en el mapa
+    doc.setTextColor(21, 87, 36);
+    doc.setFontSize(20);
+    doc.text('📍', pageWidth/2 + 50, yPos + 32, { align: 'center' });
+    doc.setFontSize(8);
+    doc.text(`Lat: ${data.lat}`, pageWidth/2 + 50, yPos + 42, { align: 'center' });
+    doc.text(`Lon: ${data.lon}`, pageWidth/2 + 50, yPos + 48, { align: 'center' });
+    
+    // ========== DATOS TÉCNICOS ==========
+    yPos += 65;
+    
+    doc.setTextColor(26, 82, 118);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('📋 DATOS TÉCNICOS', 15, yPos);
+    
+    // Línea separadora
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.5);
+    doc.line(15, yPos + 3, pageWidth - 15, yPos + 3);
+    
+    yPos += 10;
+    
+    // Datos en grid 2 columnas
+    const datos = [
+        { label: 'CÓDIGO', value: data.cod_cam },
+        { label: 'ACCESIBILIDAD', value: data.accesibili },
+        { label: 'LOCALIZACIÓN', value: data.localizaci },
+        { label: 'RASANTE', value: data.rasante },
+        { label: 'ESTADO', value: data.estado },
+        { label: 'COORDENADAS', value: data.coordenadas }
+    ];
+    
+    const colWidth = (pageWidth - 40) / 2;
+    let col = 0;
+    let row = 0;
+    
+    datos.forEach((dato, index) => {
+        const x = 15 + (col * (colWidth + 10));
+        const y = yPos + (row * 18);
+        
+        // Fondo del campo
+        doc.setFillColor(248, 249, 250);
+        doc.roundedRect(x, y, colWidth, 14, 2, 2, 'F');
+        
+        // Borde izquierdo de color
+        doc.setFillColor(rgb.r, rgb.g, rgb.b);
+        doc.rect(x, y, 3, 14, 'F');
+        
+        // Label
+        doc.setFillColor(26, 82, 118);
+        doc.roundedRect(x + 3, y, 35, 14, 0, 0, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'bold');
+        doc.text(dato.label, x + 5, y + 9);
+        
+        // Value
+        doc.setTextColor(51, 51, 51);
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        const maxWidth = colWidth - 45;
+        const valueText = dato.value.length > 30 ? dato.value.substring(0, 30) + '...' : dato.value;
+        doc.text(valueText, x + 40, y + 9);
+        
+        col++;
+        if (col >= 2) {
+            col = 0;
+            row++;
+        }
+    });
+    
+    // ========== COORDENADAS GEOGRÁFICAS ==========
+    yPos += (Math.ceil(datos.length / 2) * 18) + 15;
+    
+    // Fondo de sección
+    doc.setFillColor(26, 82, 118, 0.1);
+    doc.roundedRect(15, yPos - 5, pageWidth - 30, 45, 3, 3, 'F');
+    
+    doc.setTextColor(26, 82, 118);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('🌐 COORDENADAS GEOGRÁFICAS', 20, yPos + 5);
+    
+    // Coordenadas en 3 columnas
+    const coordWidth = (pageWidth - 50) / 3;
+    const coords = [
+        { label: 'LATITUD', value: data.lat },
+        { label: 'LONGITUD', value: data.lon },
+        { label: 'ALTITUD', value: '3,706 m.s.n.m.' }
+    ];
+    
+    coords.forEach((coord, index) => {
+        const x = 20 + (index * (coordWidth + 5));
+        const y = yPos + 12;
+        
+        // Recuadro blanco
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(x, y, coordWidth, 22, 3, 3, 'F');
+        
+        // Label
+        doc.setTextColor(102, 102, 102);
+        doc.setFontSize(7);
+        doc.text(coord.label, x + coordWidth/2, y + 7, { align: 'center' });
+        
+        // Value
+        doc.setTextColor(26, 82, 118);
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.text(coord.value, x + coordWidth/2, y + 16, { align: 'center' });
+    });
+    
+    // ========== FOOTER ==========
+    const footerY = pageHeight - 25;
+    
+    // Línea superior del footer
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.5);
+    doc.line(15, footerY, pageWidth - 15, footerY);
+    
+    // Fecha de generación
+    doc.setTextColor(102, 102, 102);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    const fecha = new Date().toLocaleString('es-BO');
+    doc.text(`Generado: ${fecha}`, 15, footerY + 8);
+    doc.text('Sistema: Geoportal Cámaras Pluviales v1.0', 15, footerY + 14);
+    
+    // QR Placeholder
+    doc.setFillColor(51, 51, 51);
+    doc.roundedRect(pageWidth/2 - 10, footerY + 3, 20, 20, 2, 2, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(6);
+    doc.text('QR', pageWidth/2, footerY + 15, { align: 'center' });
+    
+    // Autores
+    doc.setTextColor(102, 102, 102);
+    doc.setFontSize(8);
+    doc.text('Elaborado por:', pageWidth - 15, footerY + 5, { align: 'right' });
+    doc.text('Geogr. John Leonardo Cabrera E.', pageWidth - 15, footerY + 11, { align: 'right' });
+    doc.text('Geogr. Luis Freddy Quenta A.', pageWidth - 15, footerY + 17, { align: 'right' });
+    
+    // ========== MARCA DE AGUA ==========
+    doc.setTextColor(0, 0, 0, 0.03);
+    doc.setFontSize(60);
+    doc.setFont('helvetica', 'bold');
+    doc.text('GAMO', pageWidth/2, pageHeight/2, { align: 'center', angle: 45 });
+    
+    // Guardar PDF
+    doc.save(`Ficha_Tecnica_${data.cod_cam}.pdf`);
+}
+
+// Función auxiliar para convertir hex a RGB
+function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : { r: 23, g: 162, b: 184 };
+}
