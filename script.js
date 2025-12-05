@@ -196,8 +196,8 @@ async function cargarCapa() {
             map.removeLayer(capaActual);
         }
         
-        // Crear capa de marcadores
-        capaActual = L.layerGroup();
+        // Crear capa de marcadores (featureGroup para poder usar getBounds)
+        capaActual = L.featureGroup();
         
         let puntoNumero = 0; // Contador de puntos
         
@@ -221,15 +221,33 @@ async function cargarCapa() {
                         // Crear popup con título
                         let popupContent = `<div class="popup-title">📍 Cámara ${feature.cod_cam || puntoNumero}</div>`;
                         
-                        // 1. FOTO al inicio (usar campo 'fot_cam_q')
-                        if (feature.fot_cam_q) {
-                            const imageUrl = convertDriveUrl(feature.fot_cam_q);
+                        // Debug: mostrar todos los campos disponibles
+                        console.log('Campos disponibles:', Object.keys(feature));
+                        console.log('Valor fot_cam_q:', feature.fot_cam_q);
+                        
+                        // 1. FOTO al inicio - buscar en varios campos posibles
+                        let fotoUrl = feature.fot_cam_q || feature.fot_cam_d || feature.foto || feature.imagen || feature.img;
+                        
+                        // Buscar cualquier campo que contenga 'fot' o 'img'
+                        if (!fotoUrl) {
+                            for (let key of Object.keys(feature)) {
+                                if ((key.toLowerCase().includes('fot') || key.toLowerCase().includes('img')) && feature[key]) {
+                                    fotoUrl = feature[key];
+                                    console.log('Campo de foto encontrado:', key, '=', fotoUrl);
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        if (fotoUrl) {
+                            const imageUrl = convertDriveUrl(fotoUrl);
+                            console.log('URL convertida:', imageUrl);
                             popupContent += `
                                 <div class="popup-image-container">
                                     <img src="${imageUrl}" class="popup-image" alt="Foto de cámara" 
                                          onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';" 
-                                         onclick="window.open('${feature.fot_cam_q}', '_blank')">
-                                    <a href="${feature.fot_cam_q}" target="_blank" class="popup-image-link" style="display:none;">📷 Ver imagen en Drive</a>
+                                         onclick="window.open('${fotoUrl}', '_blank')">
+                                    <a href="${fotoUrl}" target="_blank" class="popup-image-link" style="display:none;">📷 Ver imagen en Drive</a>
                                 </div>
                             `;
                         }
