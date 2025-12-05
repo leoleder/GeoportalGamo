@@ -609,6 +609,42 @@ body {
     filter: brightness(1.1);
 }
 
+/* Botón de descarga de ficha técnica */
+.popup-download-btn {
+    margin-top: 15px;
+    padding-top: 12px;
+    border-top: 2px dashed #e0e0e0;
+    text-align: center;
+}
+
+.btn-ficha {
+    width: 100%;
+    padding: 12px 15px;
+    background: linear-gradient(135deg, #1a5276 0%, #2980b9 100%);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(26, 82, 118, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-ficha:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 25px rgba(26, 82, 118, 0.5);
+    background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+}
+
+.btn-ficha:active {
+    transform: translateY(-1px);
+}
+
 .image-loading {
     color: #999;
     font-style: italic;
