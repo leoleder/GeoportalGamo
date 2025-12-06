@@ -868,243 +868,558 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Función para generar Ficha Técnica en PDF
-function generarFichaPDF(data) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p', 'mm', 'letter'); // Tamaño carta vertical
+// ==================== FUNCIONES PARA GENERACIÓN DE FICHA PDF ====================
+
+/**
+ * Carga una imagen desde URL usando fetch con proxy para evitar CORS
+ * Retorna una promesa con el DataURL en base64
+ */
+async function cargarImagenBase64(url) {
+    if (!url) return null;
     
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
+    // Convertir URL de Google Drive
+    const imageUrl = convertDriveUrl(url);
     
-    // Colores según accesibilidad
-    const colorHex = data.color || '#17a2b8';
-    const rgb = hexToRgb(colorHex);
-    
-    // ========== ENCABEZADO ==========
-    // Fondo del encabezado
-    doc.setFillColor(26, 82, 118);
-    doc.rect(0, 0, pageWidth, 35, 'F');
-    
-    // Logo (círculo blanco)
-    doc.setFillColor(255, 255, 255);
-    doc.circle(25, 17.5, 12, 'F');
-    
-    // Texto del logo
-    doc.setTextColor(26, 82, 118);
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'bold');
-    doc.text('GAMO', 25, 15, { align: 'center' });
-    doc.text('ORURO', 25, 20, { align: 'center' });
-    
-    // Título
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
-    doc.text('FICHA TÉCNICA - CÁMARA PLUVIAL', 45, 15);
-    
-    // Subtítulo
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Sistema de Drenaje Pluvial - Gobierno Autónomo Municipal de Oruro', 45, 23);
-    
-    // ========== BARRA DE CÓDIGO Y ESTADO ==========
-    doc.setFillColor(rgb.r, rgb.g, rgb.b);
-    doc.rect(0, 35, pageWidth, 18, 'F');
-    
-    // Código de cámara
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.text(`📍 ${data.cod_cam}`, 15, 46);
-    
-    // Badge de estado
-    doc.setFillColor(255, 255, 255, 0.3);
-    const estadoText = data.accesibili.toUpperCase();
-    const estadoWidth = doc.getTextWidth(estadoText) + 16;
-    doc.roundedRect(pageWidth - estadoWidth - 15, 39, estadoWidth, 10, 3, 3, 'F');
-    doc.setFontSize(9);
-    doc.text(estadoText, pageWidth - 15, 45.5, { align: 'right' });
-    
-    // ========== SECCIÓN DE FOTO Y MAPA ==========
-    let yPos = 60;
-    
-    // Título Fotografía
-    doc.setTextColor(26, 82, 118);
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text('📷 FOTOGRAFÍA', 15, yPos);
-    
-    // Título Ubicación
-    doc.text('🗺️ UBICACIÓN', pageWidth/2 + 10, yPos);
-    
-    yPos += 5;
-    
-    // Recuadro de foto
-    doc.setDrawColor(rgb.r, rgb.g, rgb.b);
-    doc.setLineWidth(1);
-    doc.setFillColor(240, 240, 240);
-    doc.roundedRect(15, yPos, 80, 55, 3, 3, 'FD');
-    
-    // Texto placeholder de foto
-    doc.setTextColor(150, 150, 150);
-    doc.setFontSize(9);
-    doc.text('Imagen de la cámara', 55, yPos + 30, { align: 'center' });
-    
-    // Recuadro de mapa
-    doc.setDrawColor(41, 128, 185);
-    doc.setFillColor(212, 237, 218);
-    doc.roundedRect(pageWidth/2 + 10, yPos, 80, 55, 3, 3, 'FD');
-    
-    // Marcador en el mapa
-    doc.setTextColor(21, 87, 36);
-    doc.setFontSize(20);
-    doc.text('📍', pageWidth/2 + 50, yPos + 32, { align: 'center' });
-    doc.setFontSize(8);
-    doc.text(`Lat: ${data.lat}`, pageWidth/2 + 50, yPos + 42, { align: 'center' });
-    doc.text(`Lon: ${data.lon}`, pageWidth/2 + 50, yPos + 48, { align: 'center' });
-    
-    // ========== DATOS TÉCNICOS ==========
-    yPos += 65;
-    
-    doc.setTextColor(26, 82, 118);
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text('📋 DATOS TÉCNICOS', 15, yPos);
-    
-    // Línea separadora
-    doc.setDrawColor(200, 200, 200);
-    doc.setLineWidth(0.5);
-    doc.line(15, yPos + 3, pageWidth - 15, yPos + 3);
-    
-    yPos += 10;
-    
-    // Datos en grid 2 columnas
-    const datos = [
-        { label: 'CÓDIGO', value: data.cod_cam },
-        { label: 'ACCESIBILIDAD', value: data.accesibili },
-        { label: 'LOCALIZACIÓN', value: data.localizaci },
-        { label: 'RASANTE', value: data.rasante },
-        { label: 'ESTADO', value: data.estado },
-        { label: 'COORDENADAS', value: data.coordenadas }
+    // Lista de proxies a intentar
+    const proxies = [
+        (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+        (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+        (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`
     ];
     
-    const colWidth = (pageWidth - 40) / 2;
-    let col = 0;
-    let row = 0;
+    // Intentar con cada proxy
+    for (let i = 0; i < proxies.length; i++) {
+        try {
+            const proxyUrl = proxies[i](imageUrl);
+            console.log(`Intentando proxy ${i + 1}: ${proxyUrl}`);
+            
+            const response = await fetch(proxyUrl, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'image/*'
+                }
+            });
+            
+            if (!response.ok) {
+                console.log(`Proxy ${i + 1} falló con status: ${response.status}`);
+                continue;
+            }
+            
+            const blob = await response.blob();
+            
+            // Verificar que sea una imagen válida
+            if (!blob.type.startsWith('image/')) {
+                console.log(`Proxy ${i + 1} no devolvió una imagen válida: ${blob.type}`);
+                continue;
+            }
+            
+            // Convertir Blob a DataURL
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    console.log('Imagen cargada exitosamente');
+                    resolve(reader.result);
+                };
+                reader.onerror = () => {
+                    console.log('Error al leer blob');
+                    reject(new Error('Error al leer imagen'));
+                };
+                reader.readAsDataURL(blob);
+            });
+            
+        } catch (error) {
+            console.log(`Error con proxy ${i + 1}:`, error.message);
+            continue;
+        }
+    }
     
-    datos.forEach((dato, index) => {
-        const x = 15 + (col * (colWidth + 10));
-        const y = yPos + (row * 18);
+    // Fallback: Intentar carga directa con Image + Canvas (puede fallar por CORS)
+    console.log('Intentando carga directa con Image...');
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
         
-        // Fondo del campo
-        doc.setFillColor(248, 249, 250);
-        doc.roundedRect(x, y, colWidth, 14, 2, 2, 'F');
+        img.onload = function() {
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                console.log('Imagen cargada por fallback');
+                resolve(dataUrl);
+            } catch (e) {
+                console.log('Canvas tainted - no se pudo obtener imagen:', e);
+                resolve(null);
+            }
+        };
         
-        // Borde izquierdo de color
-        doc.setFillColor(rgb.r, rgb.g, rgb.b);
-        doc.rect(x, y, 3, 14, 'F');
+        img.onerror = function() {
+            console.log('Error al cargar imagen directamente');
+            resolve(null);
+        };
         
-        // Label
+        // Agregar timestamp para evitar caché
+        img.src = imageUrl + (imageUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
+        
+        // Timeout de 5 segundos
+        setTimeout(() => {
+            if (!img.complete) {
+                console.log('Timeout al cargar imagen');
+                resolve(null);
+            }
+        }, 5000);
+    });
+}
+
+/**
+ * Genera un mapa estático usando tiles de OpenStreetMap
+ * Retorna un DataURL de la imagen del mapa
+ */
+async function generarMapaEstatico(lat, lon, zoom = 17, width = 300, height = 200) {
+    return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        
+        // Convertir lat/lon a tile coordinates
+        const n = Math.pow(2, zoom);
+        const xtile = Math.floor((parseFloat(lon) + 180) / 360 * n);
+        const ytile = Math.floor((1 - Math.log(Math.tan(parseFloat(lat) * Math.PI / 180) + 1 / Math.cos(parseFloat(lat) * Math.PI / 180)) / Math.PI) / 2 * n);
+        
+        // Calcular offset dentro del tile
+        const xOffset = ((parseFloat(lon) + 180) / 360 * n - xtile) * 256;
+        const yOffset = ((1 - Math.log(Math.tan(parseFloat(lat) * Math.PI / 180) + 1 / Math.cos(parseFloat(lat) * Math.PI / 180)) / Math.PI) / 2 * n - ytile) * 256;
+        
+        // Cargar tiles alrededor del punto central
+        const tilesLoaded = [];
+        const tilesNeeded = 9; // 3x3 grid
+        let loadedCount = 0;
+        
+        // Dibujar fondo mientras cargan los tiles
+        ctx.fillStyle = '#e8e8e8';
+        ctx.fillRect(0, 0, width, height);
+        
+        // Cargar 3x3 grid de tiles
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                const tx = xtile + dx;
+                const ty = ytile + dy;
+                const tileUrl = `https://tile.openstreetmap.org/${zoom}/${tx}/${ty}.png`;
+                
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                
+                img.onload = function() {
+                    const drawX = (dx + 1) * 256 - xOffset - (256 * 1.5 - width / 2);
+                    const drawY = (dy + 1) * 256 - yOffset - (256 * 1.5 - height / 2);
+                    ctx.drawImage(img, drawX, drawY, 256, 256);
+                    loadedCount++;
+                    
+                    if (loadedCount === tilesNeeded) {
+                        // Todos los tiles cargados, agregar marcador
+                        dibujarMarcador(ctx, width / 2, height / 2);
+                        resolve(canvas.toDataURL('image/png'));
+                    }
+                };
+                
+                img.onerror = function() {
+                    loadedCount++;
+                    if (loadedCount === tilesNeeded) {
+                        dibujarMarcador(ctx, width / 2, height / 2);
+                        resolve(canvas.toDataURL('image/png'));
+                    }
+                };
+                
+                img.src = tileUrl;
+            }
+        }
+        
+        // Timeout de seguridad
+        setTimeout(() => {
+            if (loadedCount < tilesNeeded) {
+                dibujarMarcador(ctx, width / 2, height / 2);
+                resolve(canvas.toDataURL('image/png'));
+            }
+        }, 5000);
+    });
+}
+
+/**
+ * Dibuja un marcador de ubicación en el canvas
+ */
+function dibujarMarcador(ctx, x, y) {
+    // Sombra del marcador
+    ctx.beginPath();
+    ctx.ellipse(x, y + 25, 10, 5, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fill();
+    
+    // Pin del marcador
+    ctx.beginPath();
+    ctx.moveTo(x, y + 20);
+    ctx.bezierCurveTo(x - 15, y + 5, x - 15, y - 15, x, y - 20);
+    ctx.bezierCurveTo(x + 15, y - 15, x + 15, y + 5, x, y + 20);
+    ctx.fillStyle = '#dc3545';
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    // Círculo interior
+    ctx.beginPath();
+    ctx.arc(x, y - 5, 6, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff';
+    ctx.fill();
+}
+
+/**
+ * Función principal para generar la Ficha Técnica en PDF
+ * Incluye imagen de cámara y mapa de ubicación lado a lado
+ */
+async function generarFichaPDF(data) {
+    // Mostrar indicador de carga
+    const loadingDiv = document.createElement('div');
+    loadingDiv.id = 'pdfLoading';
+    loadingDiv.innerHTML = `
+        <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000;">
+            <div style="background: white; padding: 30px 50px; border-radius: 15px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+                <div style="font-size: 40px; margin-bottom: 15px;">📄</div>
+                <div style="font-size: 18px; font-weight: bold; color: #333;">Generando Ficha Técnica...</div>
+                <div style="font-size: 14px; color: #666; margin-top: 10px;">Cargando imágenes y datos</div>
+                <div style="margin-top: 20px; width: 200px; height: 6px; background: #e0e0e0; border-radius: 3px; overflow: hidden;">
+                    <div style="width: 0%; height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 3px; animation: loadingBar 2s ease-in-out infinite;"></div>
+                </div>
+            </div>
+        </div>
+        <style>
+            @keyframes loadingBar {
+                0% { width: 0%; }
+                50% { width: 70%; }
+                100% { width: 100%; }
+            }
+        </style>
+    `;
+    document.body.appendChild(loadingDiv);
+    
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'letter'); // Tamaño carta vertical
+        
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 12; // Margen lateral
+        const contentWidth = pageWidth - (margin * 2);
+        
+        // Colores según accesibilidad
+        const colorHex = data.color || '#17a2b8';
+        const rgb = hexToRgb(colorHex);
+        
+        // ========== ENCABEZADO ==========
+        // Fondo del encabezado
         doc.setFillColor(26, 82, 118);
-        doc.roundedRect(x + 3, y, 35, 14, 0, 0, 'F');
-        doc.setTextColor(255, 255, 255);
+        doc.rect(0, 0, pageWidth, 32, 'F');
+        
+        // Logo (círculo blanco)
+        doc.setFillColor(255, 255, 255);
+        doc.circle(22, 16, 10, 'F');
+        
+        // Texto del logo
+        doc.setTextColor(26, 82, 118);
         doc.setFontSize(7);
         doc.setFont('helvetica', 'bold');
-        doc.text(dato.label, x + 5, y + 9);
+        doc.text('GAMO', 22, 14, { align: 'center' });
+        doc.text('ORURO', 22, 18, { align: 'center' });
         
-        // Value
-        doc.setTextColor(51, 51, 51);
-        doc.setFontSize(8);
+        // Título
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.text('FICHA TÉCNICA - CÁMARA PLUVIAL', 38, 13);
+        
+        // Subtítulo
+        doc.setFontSize(9);
         doc.setFont('helvetica', 'normal');
-        const maxWidth = colWidth - 45;
-        const valueText = dato.value.length > 30 ? dato.value.substring(0, 30) + '...' : dato.value;
-        doc.text(valueText, x + 40, y + 9);
+        doc.text('Sistema de Drenaje Pluvial - Gobierno Autónomo Municipal de Oruro', 38, 21);
         
-        col++;
-        if (col >= 2) {
-            col = 0;
-            row++;
-        }
-    });
-    
-    // ========== COORDENADAS GEOGRÁFICAS ==========
-    yPos += (Math.ceil(datos.length / 2) * 18) + 15;
-    
-    // Fondo de sección
-    doc.setFillColor(26, 82, 118, 0.1);
-    doc.roundedRect(15, yPos - 5, pageWidth - 30, 45, 3, 3, 'F');
-    
-    doc.setTextColor(26, 82, 118);
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text('🌐 COORDENADAS GEOGRÁFICAS', 20, yPos + 5);
-    
-    // Coordenadas en 3 columnas
-    const coordWidth = (pageWidth - 50) / 3;
-    const coords = [
-        { label: 'LATITUD', value: data.lat },
-        { label: 'LONGITUD', value: data.lon },
-        { label: 'ALTITUD', value: '3,706 m.s.n.m.' }
-    ];
-    
-    coords.forEach((coord, index) => {
-        const x = 20 + (index * (coordWidth + 5));
-        const y = yPos + 12;
+        // ========== BARRA DE CÓDIGO Y ESTADO ==========
+        doc.setFillColor(rgb.r, rgb.g, rgb.b);
+        doc.rect(0, 32, pageWidth, 15, 'F');
         
-        // Recuadro blanco
+        // Código de cámara
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`CÁMARA: ${data.cod_cam}`, margin, 42);
+        
+        // Badge de estado
         doc.setFillColor(255, 255, 255);
-        doc.roundedRect(x, y, coordWidth, 22, 3, 3, 'F');
+        const estadoText = data.accesibili.toUpperCase();
+        const estadoWidth = doc.getTextWidth(estadoText) + 12;
+        doc.roundedRect(pageWidth - estadoWidth - margin, 36, estadoWidth, 8, 2, 2, 'F');
+        doc.setTextColor(rgb.r, rgb.g, rgb.b);
+        doc.setFontSize(8);
+        doc.text(estadoText, pageWidth - margin - 6, 41, { align: 'right' });
         
-        // Label
+        // ========== SECCIÓN DE IMÁGENES (FOTO Y MAPA) ==========
+        let yPos = 52;
+        
+        // Ancho de cada imagen (lado a lado con espacio entre ellas)
+        const imageWidth = (contentWidth - 6) / 2; // 6mm de espacio entre imágenes
+        const imageHeight = 50;
+        
+        // Posiciones X
+        const leftImageX = margin;
+        const rightImageX = margin + imageWidth + 6;
+        
+        // Título Fotografía
+        doc.setTextColor(26, 82, 118);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text('FOTOGRAFÍA', leftImageX, yPos);
+        
+        // Título Ubicación
+        doc.text('UBICACIÓN', rightImageX, yPos);
+        
+        yPos += 4;
+        
+        // ===== RECUADRO DE FOTOGRAFÍA (IZQUIERDA) =====
+        doc.setDrawColor(rgb.r, rgb.g, rgb.b);
+        doc.setLineWidth(0.8);
+        doc.setFillColor(245, 245, 245);
+        doc.roundedRect(leftImageX, yPos, imageWidth, imageHeight, 2, 2, 'FD');
+        
+        // Cargar imagen de la cámara
+        let fotoBase64 = null;
+        if (data.fotoUrl) {
+            console.log('Cargando imagen de cámara:', data.fotoUrl);
+            fotoBase64 = await cargarImagenBase64(data.fotoUrl);
+        }
+        
+        if (fotoBase64) {
+            // Calcular dimensiones para que la imagen quepa en el recuadro
+            const imgPadding = 2;
+            const maxImgWidth = imageWidth - (imgPadding * 2);
+            const maxImgHeight = imageHeight - (imgPadding * 2);
+            
+            // Insertar imagen
+            try {
+                doc.addImage(fotoBase64, 'JPEG', leftImageX + imgPadding, yPos + imgPadding, maxImgWidth, maxImgHeight, undefined, 'FAST');
+            } catch (e) {
+                console.error('Error al insertar imagen de cámara:', e);
+                // Dibujar placeholder
+                doc.setTextColor(150, 150, 150);
+                doc.setFontSize(9);
+                doc.text('📷 Imagen no disponible', leftImageX + imageWidth/2, yPos + imageHeight/2, { align: 'center' });
+            }
+        } else {
+            // Dibujar placeholder si no hay imagen
+            doc.setTextColor(150, 150, 150);
+            doc.setFontSize(9);
+            doc.text('📷 Imagen no disponible', leftImageX + imageWidth/2, yPos + imageHeight/2, { align: 'center' });
+        }
+        
+        // ===== RECUADRO DE MAPA (DERECHA) =====
+        doc.setDrawColor(41, 128, 185);
+        doc.setFillColor(232, 244, 248);
+        doc.roundedRect(rightImageX, yPos, imageWidth, imageHeight, 2, 2, 'FD');
+        
+        // Generar mapa estático
+        console.log('Generando mapa estático para:', data.lat, data.lon);
+        const mapBase64 = await generarMapaEstatico(data.lat, data.lon, 17, 400, 280);
+        
+        if (mapBase64) {
+            const imgPadding = 2;
+            const maxImgWidth = imageWidth - (imgPadding * 2);
+            const maxImgHeight = imageHeight - (imgPadding * 2);
+            
+            try {
+                doc.addImage(mapBase64, 'PNG', rightImageX + imgPadding, yPos + imgPadding, maxImgWidth, maxImgHeight, undefined, 'FAST');
+            } catch (e) {
+                console.error('Error al insertar mapa:', e);
+                // Dibujar placeholder
+                doc.setTextColor(21, 87, 36);
+                doc.setFontSize(16);
+                doc.text('📍', rightImageX + imageWidth/2, yPos + imageHeight/2 - 5, { align: 'center' });
+                doc.setFontSize(7);
+                doc.text(`Lat: ${data.lat}`, rightImageX + imageWidth/2, yPos + imageHeight/2 + 5, { align: 'center' });
+                doc.text(`Lon: ${data.lon}`, rightImageX + imageWidth/2, yPos + imageHeight/2 + 10, { align: 'center' });
+            }
+        } else {
+            // Placeholder del mapa
+            doc.setTextColor(21, 87, 36);
+            doc.setFontSize(16);
+            doc.text('📍', rightImageX + imageWidth/2, yPos + imageHeight/2 - 5, { align: 'center' });
+            doc.setFontSize(7);
+            doc.text(`Lat: ${data.lat}`, rightImageX + imageWidth/2, yPos + imageHeight/2 + 5, { align: 'center' });
+            doc.text(`Lon: ${data.lon}`, rightImageX + imageWidth/2, yPos + imageHeight/2 + 10, { align: 'center' });
+        }
+        
+        // ========== DATOS TÉCNICOS ==========
+        yPos += imageHeight + 8;
+        
+        doc.setTextColor(26, 82, 118);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text('DATOS TÉCNICOS', margin, yPos);
+        
+        // Línea separadora
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.3);
+        doc.line(margin, yPos + 2, pageWidth - margin, yPos + 2);
+        
+        yPos += 8;
+        
+        // Datos en grid 2 columnas
+        const datos = [
+            { label: 'CÓDIGO', value: data.cod_cam },
+            { label: 'ACCESIBILIDAD', value: data.accesibili },
+            { label: 'LOCALIZACIÓN', value: data.localizaci },
+            { label: 'RASANTE', value: data.rasante },
+            { label: 'ESTADO', value: data.estado },
+            { label: 'COORDENADAS', value: data.coordenadas }
+        ];
+        
+        const colWidth = (contentWidth - 6) / 2;
+        let col = 0;
+        let row = 0;
+        
+        datos.forEach((dato, index) => {
+            const x = margin + (col * (colWidth + 6));
+            const y = yPos + (row * 15);
+            
+            // Fondo del campo
+            doc.setFillColor(248, 249, 250);
+            doc.roundedRect(x, y, colWidth, 12, 1.5, 1.5, 'F');
+            
+            // Borde izquierdo de color
+            doc.setFillColor(rgb.r, rgb.g, rgb.b);
+            doc.rect(x, y, 2.5, 12, 'F');
+            
+            // Label
+            doc.setFillColor(26, 82, 118);
+            doc.roundedRect(x + 2.5, y, 28, 12, 0, 0, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(6);
+            doc.setFont('helvetica', 'bold');
+            doc.text(dato.label, x + 4, y + 7);
+            
+            // Value
+            doc.setTextColor(51, 51, 51);
+            doc.setFontSize(7);
+            doc.setFont('helvetica', 'normal');
+            const maxValueWidth = colWidth - 35;
+            let valueText = dato.value || 'Sin datos';
+            // Truncar si es muy largo
+            while (doc.getTextWidth(valueText) > maxValueWidth && valueText.length > 3) {
+                valueText = valueText.substring(0, valueText.length - 4) + '...';
+            }
+            doc.text(valueText, x + 32, y + 7);
+            
+            col++;
+            if (col >= 2) {
+                col = 0;
+                row++;
+            }
+        });
+        
+        // ========== COORDENADAS GEOGRÁFICAS ==========
+        yPos += (Math.ceil(datos.length / 2) * 15) + 10;
+        
+        // Fondo de sección
+        doc.setFillColor(232, 244, 248);
+        doc.roundedRect(margin, yPos - 3, contentWidth, 38, 2, 2, 'F');
+        
+        doc.setTextColor(26, 82, 118);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text('COORDENADAS GEOGRÁFICAS', margin + 4, yPos + 5);
+        
+        // Coordenadas en 3 columnas
+        const coordWidth = (contentWidth - 16) / 3;
+        const coords = [
+            { label: 'LATITUD', value: data.lat },
+            { label: 'LONGITUD', value: data.lon },
+            { label: 'ALTITUD', value: '3,706 m.s.n.m.' }
+        ];
+        
+        coords.forEach((coord, index) => {
+            const x = margin + 4 + (index * (coordWidth + 4));
+            const y = yPos + 12;
+            
+            // Recuadro blanco
+            doc.setFillColor(255, 255, 255);
+            doc.roundedRect(x, y, coordWidth, 18, 2, 2, 'F');
+            
+            // Label
+            doc.setTextColor(102, 102, 102);
+            doc.setFontSize(6);
+            doc.text(coord.label, x + coordWidth/2, y + 5, { align: 'center' });
+            
+            // Value
+            doc.setTextColor(26, 82, 118);
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.text(coord.value, x + coordWidth/2, y + 13, { align: 'center' });
+        });
+        
+        // ========== FOOTER ==========
+        const footerY = pageHeight - 22;
+        
+        // Línea superior del footer
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.3);
+        doc.line(margin, footerY, pageWidth - margin, footerY);
+        
+        // Fecha de generación
         doc.setTextColor(102, 102, 102);
         doc.setFontSize(7);
-        doc.text(coord.label, x + coordWidth/2, y + 7, { align: 'center' });
+        doc.setFont('helvetica', 'normal');
+        const fecha = new Date().toLocaleString('es-BO');
+        doc.text(`Generado: ${fecha}`, margin, footerY + 6);
+        doc.text('Sistema: Geoportal Cámaras Pluviales v1.0', margin, footerY + 11);
         
-        // Value
-        doc.setTextColor(26, 82, 118);
-        doc.setFontSize(11);
+        // QR Placeholder
+        doc.setFillColor(51, 51, 51);
+        doc.roundedRect(pageWidth/2 - 8, footerY + 2, 16, 16, 1.5, 1.5, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(5);
+        doc.text('QR', pageWidth/2, footerY + 11, { align: 'center' });
+        
+        // Autores
+        doc.setTextColor(102, 102, 102);
+        doc.setFontSize(7);
+        doc.text('Elaborado por:', pageWidth - margin, footerY + 4, { align: 'right' });
+        doc.text('Geogr. John Leonardo Cabrera E.', pageWidth - margin, footerY + 9, { align: 'right' });
+        doc.text('Geogr. Luis Freddy Quenta A.', pageWidth - margin, footerY + 14, { align: 'right' });
+        
+        // ========== MARCA DE AGUA ==========
+        doc.setTextColor(0, 0, 0);
+        doc.setGState(new doc.GState({ opacity: 0.03 }));
+        doc.setFontSize(50);
         doc.setFont('helvetica', 'bold');
-        doc.text(coord.value, x + coordWidth/2, y + 16, { align: 'center' });
-    });
-    
-    // ========== FOOTER ==========
-    const footerY = pageHeight - 25;
-    
-    // Línea superior del footer
-    doc.setDrawColor(200, 200, 200);
-    doc.setLineWidth(0.5);
-    doc.line(15, footerY, pageWidth - 15, footerY);
-    
-    // Fecha de generación
-    doc.setTextColor(102, 102, 102);
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    const fecha = new Date().toLocaleString('es-BO');
-    doc.text(`Generado: ${fecha}`, 15, footerY + 8);
-    doc.text('Sistema: Geoportal Cámaras Pluviales v1.0', 15, footerY + 14);
-    
-    // QR Placeholder
-    doc.setFillColor(51, 51, 51);
-    doc.roundedRect(pageWidth/2 - 10, footerY + 3, 20, 20, 2, 2, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(6);
-    doc.text('QR', pageWidth/2, footerY + 15, { align: 'center' });
-    
-    // Autores
-    doc.setTextColor(102, 102, 102);
-    doc.setFontSize(8);
-    doc.text('Elaborado por:', pageWidth - 15, footerY + 5, { align: 'right' });
-    doc.text('Geogr. John Leonardo Cabrera E.', pageWidth - 15, footerY + 11, { align: 'right' });
-    doc.text('Geogr. Luis Freddy Quenta A.', pageWidth - 15, footerY + 17, { align: 'right' });
-    
-    // ========== MARCA DE AGUA ==========
-    doc.setTextColor(0, 0, 0, 0.03);
-    doc.setFontSize(60);
-    doc.setFont('helvetica', 'bold');
-    doc.text('GAMO', pageWidth/2, pageHeight/2, { align: 'center', angle: 45 });
-    
-    // Guardar PDF
-    doc.save(`Ficha_Tecnica_${data.cod_cam}.pdf`);
+        doc.text('GAMO', pageWidth/2, pageHeight/2, { align: 'center', angle: 45 });
+        
+        // Restaurar opacidad
+        doc.setGState(new doc.GState({ opacity: 1 }));
+        
+        // Guardar PDF
+        doc.save(`Ficha_Tecnica_${data.cod_cam}.pdf`);
+        
+        console.log('PDF generado exitosamente');
+        
+    } catch (error) {
+        console.error('Error al generar PDF:', error);
+        alert('Error al generar el PDF. Por favor intente nuevamente.');
+    } finally {
+        // Remover indicador de carga
+        const loading = document.getElementById('pdfLoading');
+        if (loading) {
+            loading.remove();
+        }
+    }
 }
 
 // Función auxiliar para convertir hex a RGB
